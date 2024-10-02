@@ -1,0 +1,36 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* CSS Variables */
+:root {
+	--background-color: #fff;
+	--text-color: #000;
+}
+
+/* Dark Mode CSS variables */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background-color: #000;
+		--text-color: #fff;
+	}
+}
+
+/* Global Styles */
+* {
+	font-family: 'Inter', sans-serif, system-ui;
+}
+
+h1 {
+	font-size: 2rem;
+	font-weight: 700;
+}
+
+body {
+	background-color: var(--background-color);
+	color: var(--text-color);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
