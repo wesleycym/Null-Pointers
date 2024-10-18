@@ -28,12 +28,23 @@
     </header>
 
     <main>
-        <section class="post-box">
+        <!-- <section class="post-box">
             <textarea placeholder="What's happening?" rows="4"></textarea>
             <button type="submit"><i class="fa-solid fa-dumbbell"></i> Post</button>
-        </section>
+        </section> -->
 
         <section class="feed">
+            <!-- Post Form -->
+            <section class="post-box">
+                <form action="/post-path" method="post" class="post-form">
+                    <textarea name="post-content" placeholder="What's happening?" rows="4" required></textarea><br>
+                    <input type="file" name="post-image" accept="image/*"><br>
+                    <button type="submit"><i class="fa-solid fa-dumbbell"></i> Post</button>
+                </form>
+            </section>
+
+
+
             <div class="post">
                 <!-- Post 1 -->
                 <h3><i class="fas fa-user-circle"></i> User 1</h3>
@@ -59,40 +70,58 @@
                 </div>
             </div>
 
+
             <!-- Comment Section -->
-            <!-- Write a Comment -->
+            <!-- Using forms to write comments -->
             <div class="comment-section">
+                <form action="/form-path" method="post" class="comment-form">
+                    <label for="commenter">Enter your name: <br>
+                        <input type="text" name="commenter" id="commenter" placeholder="Your Name"><br>
+                    </label>
+                    <label for="">Comment: <br></label>
+                    <textarea name="comment" id="comment" placeholder="Write a comment" rows="4"
+                        required></textarea><br>
+                    <input type="submit" value="Submit" class="submit-btn">
+                </form>
+            </div>
+
+
+
+
+            <!-- Write a Comment -->
+            <!-- <div class="comment-section">
                 <div class="comment-input">
                     <textarea placeholder="Write a comment" id="comment-box" rows="2"></textarea>
                     <button type="submit" id="submit-comment"><i class="fas fa-paper-plane"></i>Reply</button>
-                </div>
+                </div> -->
 
-                <!-- Existing Comments -->
-                <div class="comments">
-                    <div class="comment">
-                        <!-- Commenter 1-->
-                        <!--    <h4><img src="img/avatar1.png" alt="Commenter 1">Commenter 1</h4> -->
-                        <h4><i class="fas fa-user-circle"></i>Commenter 1</h4>
-                        <p>This is a sample comment</p>
-                        <!-- Comment footer -->
-                        <div class="post-footer">
-                            <span><i class="far fa-heart"></i> Like</span>
-                            <span><i class="far fa-comment"></i> Comment</span>
-                            <span><i class="fas fa-share"></i> Share</span>
-                        </div>
-                    </div>
-                    <div class="comment">
-                        <!-- Commenter 2-->
-                        <h4><i class="fas fa-user-circle"></i>Commenter 2</h4>
-                        <p>This is another sample comment</p>
-                        <!-- Comment footer -->
-                        <div class="post-footer">
-                            <span><i class="far fa-heart"></i> Like</span>
-                            <span><i class="far fa-comment"></i> Comment</span>
-                            <span><i class="fas fa-share"></i> Share</span>
-                        </div>
+
+            <!-- Existing Comments -->
+            <div class="comments">
+                <div class="comment">
+                    <!-- Commenter 1-->
+                    <!--    <h4><img src="img/avatar1.png" alt="Commenter 1">Commenter 1</h4> -->
+                    <h4><i class="fas fa-user-circle"></i>Commenter 1</h4>
+                    <p>This is a sample comment</p>
+                    <!-- Comment footer -->
+                    <div class="post-footer">
+                        <span><i class="far fa-heart"></i> Like</span>
+                        <span><i class="far fa-comment"></i> Comment</span>
+                        <span><i class="fas fa-share"></i> Share</span>
                     </div>
                 </div>
+                <div class="comment">
+                    <!-- Commenter 2-->
+                    <h4><i class="fas fa-user-circle"></i>Commenter 2</h4>
+                    <p>This is another sample comment</p>
+                    <!-- Comment footer -->
+                    <div class="post-footer">
+                        <span><i class="far fa-heart"></i> Like</span>
+                        <span><i class="far fa-comment"></i> Comment</span>
+                        <span><i class="fas fa-share"></i> Share</span>
+                    </div>
+                </div>
+            </div>
             </div>
 
             <!-- More posts can go here -->
