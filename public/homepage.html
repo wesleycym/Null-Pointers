@@ -74,15 +74,18 @@
             <!-- Comment Section -->
             <!-- Using forms to write comments -->
             <div class="comment-section">
-                <form action="/form-path" method="post" class="comment-form">
-                    <label for="commenter">Enter your name: <br>
-                        <input type="text" name="commenter" id="commenter" placeholder="Your Name"><br>
-                    </label>
-                    <label for="">Comment: <br></label>
-                    <textarea name="comment" id="comment" placeholder="Write a comment" rows="4"
-                        required></textarea><br>
-                    <input type="submit" value="Submit" class="submit-btn">
-                </form>
+                <div class="comment-input">
+                    <form action="/form-path" method="post" class="comment-form">
+                        <label for="commenter">Enter your name: <br>
+                            <input type="text" name="commenter" id="commenter" placeholder="Your Name"><br>
+                        </label>
+                        <label for="">Comment: <br></label>
+                        <textarea name="comment" id="comment" placeholder="Write a comment" rows="4"
+                            required></textarea><br>
+                        <button type="submit" id="submit-comment" class=""><i
+                                class="fas fa-paper-plane"></i>Reply</button>
+                    </form>
+                </div>
             </div>
 
 
