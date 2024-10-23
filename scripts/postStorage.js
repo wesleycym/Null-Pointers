@@ -14,43 +14,11 @@ const { ObjectId } = require('mongodb'); // import ObjectId | For creating postI
 
 // Global Variables
 const db = await getDb('cse312'); // connect to cse312
-//const collection = db.collection('posts'); // Create posts collection
 
 // Main Logic
 // Feed --> Posts --> Post --> Comments, Likes
 
-/*
-
-Create functions:
-
-- createPost
-    - Adds new post to posts collection.
-
-- getPost
-    - Returns post with matching id.
-
-- deletePost
-    - Deletes post with matching id.
-
-- updatePost
-    - Will find the post with matching id.
-    - Expects id, author, message
-    - Mainly for editing the post
-
-- addComment
-    - Will find the post with matching id.
-    - Expects username (str), and comment (str)
-
-- deleteComment
-    - Will find the post with matching id.
-    - Will just remove the comment with matching username -> will need to change the way comments are stored
-
-- updateLikes
-    - Will find the post with matching id.
-    - Will just increment the likes with matching id by 1
-
-*/
-
+// createPost | Adds new post to posts collection.
 async function createPost(author, message) 
 {
     const collection = db.collection('posts');
@@ -66,6 +34,7 @@ async function createPost(author, message)
     const result = await collection.insertOne(doc);
 }
 
+// getPost | Returns post with matching id.
 async function getPost(id)
 {
     const collection = db.collection('posts');
@@ -75,6 +44,7 @@ async function getPost(id)
 
 }
 
+// deletePost | Deletes post with matching id.
 async function deletePost(id) {
     const collection = db.collection('posts');
     const findResult = collection.find({
@@ -83,6 +53,7 @@ async function deletePost(id) {
     const result = await collection.deleteOne(findResult);
 }
 
+// updatePost | Will find the post with matching id, then update the displayed post.
 async function updatePost(id, author, message) {
     const collection = db.collection('posts');
     const findResult = collection.find({
@@ -96,6 +67,8 @@ async function updatePost(id, author, message) {
     };
     const result = await collection.insertOne(doc);
 }
+
+// createComment | Adds new comment to comments collection.
 async function createComment(author, message) {
     const collection = db.collection('comments');
     // Generate postID
@@ -110,6 +83,8 @@ async function createComment(author, message) {
     const result = await collection.insertOne(doc);
 
 }
+
+// getComment | Returns comment with matching id.
 async function getComment(id)
 {
     const collection = db.collection('comments');
@@ -118,6 +93,8 @@ async function getComment(id)
       });
 
 }
+
+// deleteComment | Deletes comment with matching id.
 async function deleteComment(author, message) {
     const collection = db.collection('posts');
     const findResult = collection.find({
@@ -127,6 +104,7 @@ async function deleteComment(author, message) {
     
 }
 
+// updateComment | Will find the comment with matching id, then update the displayed comment.
 async function updateComments(id, username, comment) {const collection = db.collection('posts');
     const findResult = collection.find({
         commentID: id,
