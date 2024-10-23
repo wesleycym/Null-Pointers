@@ -14,7 +14,7 @@ const { ObjectId } = require('mongodb'); // import ObjectId | For creating postI
 
 // Global Variables
 const db = await getDb('cse312'); // connect to cse312
-const collection = db.collection('posts'); // Create posts collection
+//const collection = db.collection('posts'); // Create posts collection
 
 // Main Logic
 // Feed --> Posts --> Post --> Comments, Likes
@@ -51,22 +51,92 @@ Create functions:
 
 */
 
-function createPost(author, message) 
+async function createPost(author, message) 
 {
+    const collection = db.collection('posts');
     // Generate postID
+
+    const postID = new ObjectId()
     // Add postID | Author | Message to the collection
-
+    const doc = {
+        username: author,
+        message: message,
+        postID: postID,
+    };
+    const result = await collection.insertOne(doc);
 }
 
-function getPost(id)
+async function getPost(id)
 {
+    const collection = db.collection('posts');
+    const findResult = collection.find({
+        postID: id,
+      });
 
 }
 
-function deletePost(id) {}
+async function deletePost(id) {
+    const collection = db.collection('posts');
+    const findResult = collection.find({
+        postID: id,
+      });
+    const result = await collection.deleteOne(findResult);
+}
 
-function updatePost(id, author, message) {}
+async function updatePost(id, author, message) {
+    const collection = db.collection('posts');
+    const findResult = collection.find({
+        postID: id,
+      });
+      const result1 = await collection.deleteOne(findResult);
+    const doc = {
+        username: author,
+        message: message,
+        postID: postID,
+    };
+    const result = await collection.insertOne(doc);
+}
+async function createComment(author, message) {
+    const collection = db.collection('comments');
+    // Generate postID
 
-function updateComments(id, username, comment) {}
+    const commentID = new ObjectId()
+    // Add postID | Author | Message to the collection
+    const doc = {
+        username: author,
+        message: message,
+        commentID: commentID,
+    };
+    const result = await collection.insertOne(doc);
 
-function updateLikes(id) {} // Don't worry abt this
+}
+async function getComment(id)
+{
+    const collection = db.collection('comments');
+    const findResult = collection.find({
+        commentID: id,
+      });
+
+}
+async function deleteComment(author, message) {
+    const collection = db.collection('posts');
+    const findResult = collection.find({
+        commentID: id,
+      });
+    const result = await collection.deleteOne(findResult);
+    
+}
+
+async function updateComments(id, username, comment) {const collection = db.collection('posts');
+    const findResult = collection.find({
+        commentID: id,
+      });
+      const result1 = await collection.deleteOne(findResult);
+    const doc = {
+        username: author,
+        message: message,
+        commentID: postID,
+    };
+    const result = await collection.insertOne(doc);}
+
+async function updateLikes(id) {} // Don't worry abt this
