@@ -22,7 +22,14 @@
                 <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i> Explore</a></li>
                 <li><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
                 <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
-                <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                <!--<li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>-->
+            </form>
+            <form
+					action="/auth/logout"
+					method="post"
+                    class = "post-form">
+            <button type="submit"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+            </form>
             </ul>
         </nav>
     </header>
@@ -35,7 +42,6 @@
 
         <section class="feed">
             <!-- Post Form -->
-             
             <section class="post-box">
                 <form action="/post-path" method="post" class="post-form">
                     <textarea name="post-content" placeholder="What's happening?" rows="4" required></textarea><br>
@@ -75,12 +81,7 @@
             <!-- Comment Section -->
             <!-- Using forms to write comments -->
             <div class="comment-section">
-                <div class="commen	<form
-					action="/auth/logout"
-					method="post"
-					>
-					<button type="submit">Logout</button>
-				</form>t-input">
+                <div class="comment-input">
                     <form action="/form-path" method="post" class="comment-form">
                         <label for="commenter">Enter your name: <br>
                             <input type="text" name="commenter" id="commenter" placeholder="Your Name"><br>

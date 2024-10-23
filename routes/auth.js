@@ -180,7 +180,7 @@ router.route('/login').post(async(req, res) => {
 		
 			const newer =  Buffer.from(data).toString('ascii');
 			let user = allValues[0]
-			updatedHtml = newer.replace(/<h3><i class="fas fa-user-circle"><\/i> User 1<\/h3>/, '<h3><i class="fas fa-user-circle"></i> '+ user+ ' </h3>');
+			updatedHtml = newer.replace('<li><a href="#"><i class="fas fa-user"></i> Profile</a></li>', '<li><a href="#"><i class="fas fa-user"></i> ' + user+' </a></li>');
 			writeFile(path.join('public', 'homepage.html'), updatedHtml, 'utf8', (err) => {
 				if (err) {
 					return res.status(500).send('Error writing the file');
