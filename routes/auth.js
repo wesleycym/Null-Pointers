@@ -228,8 +228,38 @@ router.route('/login').post(async(req, res) => {
 	console.log("this is updated html", updatedHtml)
 	});*/
 
-router.route('/logout').post((req, res) => {
+router.route('/logout').post(async(req, res) => {
+	const {readFile, writeFile} = require('fs');
+	const authtokenfromfront = req.cookies.auth
+	const path = require('path');
+	const db = await getDb('cse312');
+	const authcollection = db.collection('auth');
+	let hashedauth = ""
 
+
+		//getting authtoken based on username
+	const authfind = authcollection.find({});
+	let username = ""
+	for await (const doc of authfind) {
+		hashedauth = await bcrypt.hash(authtokenfromfront, doc.salt);
+		if(hashedauth == doc.authtoken){
+			username = doc.user
+		}
+	}
+
+	readFile(path.join('public', 'homepage.html'), (err, data) => {
+		if (err) {
+			return res.status(500).send('Error reading file');
+		}
+	
+		const newer =  Buffer.from(data).toString('ascii');
+		let updatedHtml = newer.replace('<li><a href="#"><i class="fas fa-user"></i> ' + username+' </a></li>', '<li><a href="#"><i class="fas fa-user"></i> Profile</a></li>');
+		writeFile(path.join('public', 'homepage.html'), updatedHtml, 'utf8', (err) => {
+			if (err) {
+				return res.status(500).send('Error writing the file');
+			}
+		});
+		});
 	//clears auth cookie 
 
 	//would also need to reset html to original state clear username
