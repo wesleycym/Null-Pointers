@@ -165,11 +165,53 @@ router.route('/login').post(async(req, res) => {
 		const old2 = {
 			user: allValues[0],
 		};
-
+		//<h3><i class="fas fa-user-circle"></i> User 1</h3>
+		let updatedHtml = ""
+		const path = require('path');
 		//deletes old auth token and inputs new one into database
 		const deleteResult2 = await collection2.deleteMany(old2);
 		const result2 = await collection2.insertOne(auth);
-  }
+		
+
+		readFile(path.join('public', 'homepage.html'), (err, data) => {
+			if (err) {
+				return res.status(500).send('Error reading file');
+			}
+		
+			const newer =  Buffer.from(data).toString('ascii');
+			let user = allValues[0]
+			updatedHtml = newer.replace('<li><a href="#"><i class="fas fa-user"></i> Profile</a></li>', '<li><a href="#"><i class="fas fa-user"></i> ' + user+' </a></li>');
+			writeFile(path.join('public', 'homepage.html'), updatedHtml, 'utf8', (err) => {
+				if (err) {
+					return res.status(500).send('Error writing the file');
+				}
+			});
+			});
+	res
+	.status(302)
+	.header({
+		Location: '/homepage',
+		'X-Content-Type-Options': 'nosniff',
+	})
+	.end();
+	
+  }else{	res
+	.status(302)
+	.header({
+		Location: '/',
+		'X-Content-Type-Options': 'nosniff',
+	})
+	.end();
+}}else{
+	res
+	.status(302)
+	.header({
+		Location: '/',
+		'X-Content-Type-Options': 'nosniff',
+	})
+	.end();
+}
+});
 
   //what i have so far for writting file 
   //correctly changes text but won't actually write to webpage
@@ -185,16 +227,6 @@ router.route('/login').post(async(req, res) => {
 	const updatedHtml = newer.replace(/<input id="username" value= "{{username}}" name="username" hidden>/g, '<input id="username" value="'+ username+'" name="username">')
 	console.log("this is updated html", updatedHtml)
 	});*/
-}
-	res
-	.status(302)
-	.header({
-		Location: '/',
-		'X-Content-Type-Options': 'nosniff',
-	})
-	.end();
-
-});
 
 router.route('/logout').post((req, res) => {
 
