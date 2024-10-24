@@ -41,6 +41,18 @@ app.get('/', async(req, res) => {
 
 // Routes
 app.use('/auth', authRouter);
+// testing how routing works
+app.use('/homepage', (req, res) => {
+	return res
+		.status(200)
+		.header({
+
+			'Content-Type': 'text/html',
+			'X-Content-Type-Options': 'nosniff',
+		})
+		.sendFile(path.join(process.cwd(), 'public', 'homepage.html'));
+})
+
 
 // Return 404 for all other requests
 app.use('/homepage', async(req, res) => {
