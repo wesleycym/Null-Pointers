@@ -10,7 +10,7 @@ Comments - (idk bruh)
 // Imports
 import { getDb } from './mongo.js'; // import getDb from mongo.js
 
-const { ObjectId } = require('mongodb'); // import ObjectId | For creating postID
+import { ObjectId } from 'mongodb'; // import ObjectId | For creating postID
 
 // Global Variables
 const db = await getDb('cse312'); // connect to cse312
@@ -51,7 +51,7 @@ Create functions:
 
 */
 
-async function createPost(author, message) {
+export async function createPost(author, message) {
 	const collection = db.collection('posts');
 	// Generate postID
 
@@ -63,16 +63,24 @@ async function createPost(author, message) {
 		postID: postID,
 	};
 	const result = await collection.insertOne(doc);
+	console.log(result);
+	return result;
 }
 
-async function getPost(id) {
+export async function getPost(id) {
 	const collection = db.collection('posts');
 	const findResult = collection.find({
 		postID: id,
 	});
 }
 
-async function deletePost(id) {
+export async function getAllPosts() {
+	const collection = db.collection('posts');
+	const posts = await collection.find({}).toArray();
+	return posts;
+}
+
+export async function deletePost(id) {
 	const collection = db.collection('posts');
 	const findResult = collection.find({
 		postID: id,
@@ -80,7 +88,7 @@ async function deletePost(id) {
 	const result = await collection.deleteOne(findResult);
 }
 
-async function updatePost(id, author, message) {
+export async function updatePost(id, author, message) {
 	const collection = db.collection('posts');
 	const findResult = collection.find({
 		postID: id,
@@ -89,11 +97,12 @@ async function updatePost(id, author, message) {
 	const doc = {
 		username: author,
 		message: message,
-		postID: postID,
+		postID: id,
 	};
 	const result = await collection.insertOne(doc);
 }
-async function createComment(author, message) {
+
+export async function createComment(author, message) {
 	const collection = db.collection('comments');
 	// Generate postID
 
@@ -106,7 +115,8 @@ async function createComment(author, message) {
 	};
 	const result = await collection.insertOne(doc);
 }
-async function deleteComment(author, message) {
+
+export async function deleteComment(author, message) {
 	const collection = db.collection('posts');
 	const findResult = collection.find({
 		commentID: id,
@@ -114,18 +124,61 @@ async function deleteComment(author, message) {
 	const result = await collection.deleteOne(findResult);
 }
 
-async function updateComments(id, username, comment) {
+export async function updateComments(id, username, comment) {
 	const collection = db.collection('posts');
 	const findResult = collection.find({
 		commentID: id,
 	});
 	const result1 = await collection.deleteOne(findResult);
 	const doc = {
-		username: author,
-		message: message,
-		commentID: postID,
+		username: username,
+		message: comment,
+		commentID: id,
 	};
 	const result = await collection.insertOne(doc);
 }
 
-async function updateLikes(id) {} // Don't worry abt this
+export async function createLike(userID, postID, isLiked) {
+	console.log('postid: ', postID);
+	const collection = db.collection('likes');
+	const doc = {
+		userID: userID,
+		postID: postID,
+		isLiked: isLiked,
+	};
+	const result = await collection.insertOne(doc);
+	return result.insertedId;
+}
+
+export async function updateLike(userID, postID) {
+	console.log('postid: ', postID);
+	const collection = db.collection('likes');
+	const existingLike = await collection.findOne({
+		userID: userID,
+		postID: postID,
+	});
+
+	if (existingLike) {
+		// Toggle the like status
+		const updatedIsLiked = !existingLike.isLiked;
+		await collection.updateOne(
+			{ userID: userID, postID: postID },
+			{ $set: { isLiked: updatedIsLiked } }
+		);
+		return updatedIsLiked;
+	} else {
+		// Create a new like if it doesn't exist
+		await createLike(userID, postID, true);
+		return true;
+	}
+}
+
+export async function getLikesForPost(postID) {
+	console.log('postid: ', postID);
+	const collection = db.collection('likes');
+	const likes = await collection
+		.find({ postID: postID, isLiked: true })
+		.toArray();
+
+	return likes.length;
+}

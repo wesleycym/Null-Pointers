@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="homepage.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="index.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <title>Homepage</title>
 </head>
@@ -18,11 +20,17 @@
             </div>
             <ul class="nav-links">
                 <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+                <li class="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i> Explore</a></li>
                 <li><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
                 <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
-                <li><a href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                <li>
+                    <form action="/auth/logout" method="post">
+                        <button type="submit" style="background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit;">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </button>
+                    </form>
+                </li>
             </ul>
         </nav>
     </header>
@@ -36,40 +44,14 @@
         <section class="feed">
             <!-- Post Form -->
             <section class="post-box">
-                <form action="/post-path" method="post" class="post-form">
+                <form action="/posts" method="post" class="post-form">
                     <textarea name="post-content" placeholder="What's happening?" rows="4" required></textarea><br>
                     <input type="file" name="post-image" accept="image/*"><br>
                     <button type="submit"><i class="fa-solid fa-dumbbell"></i> Post</button>
                 </form>
             </section>
 
-
-
-            <div class="post">
-                <!-- Post 1 -->
-                <h3><i class="fas fa-user-circle"></i> User 1</h3>
-                <p>This is a sample post.</p>
-                <div class="post-footer">
-                    <span><i class="far fa-heart"></i> Like</span>
-                    <span><i class="far fa-comment"></i> Comment</span>
-                    <span><i class="fas fa-share"></i> Share</span>
-                </div>
-            </div>
-            <div class="post">
-                <!-- Post 2 -->
-                <h3><i class="fas fa-user-circle"></i> User 2</h3>
-                <p>This is a sample post with image.</p>
-                <div class="post-image">
-                    <img src="img/planetary.jpeg" alt="Person running on treadmill">
-                </div>
-
-                <div class="post-footer">
-                    <span><i class="far fa-heart"></i> Like</span>
-                    <span><i class="far fa-comment"></i> Comment</span>
-                    <span><i class="fas fa-share"></i> Share</span>
-                </div>
-            </div>
-
+            <div class="posts"></div>
 
             <!-- Comment Section -->
             <!-- Using forms to write comments -->
@@ -108,7 +90,7 @@
                     <p>This is a sample comment</p>
                     <!-- Comment footer -->
                     <div class="post-footer">
-                        <span><i class="far fa-heart"></i> Like</span>
+                        <span class="like-button"><i class="far fa-heart"></i> Like</span>
                         <span><i class="far fa-comment"></i> Comment</span>
                         <span><i class="fas fa-share"></i> Share</span>
                     </div>
