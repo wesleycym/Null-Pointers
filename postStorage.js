@@ -102,18 +102,24 @@ export async function updatePost(id, author, message) {
 	const result = await collection.insertOne(doc);
 }
 
-export async function createComment(author, message) {
+export async function createComment(postID, author, message) {
 	const collection = db.collection('comments');
-	// Generate postID
 
 	const commentID = new ObjectId();
-	// Add postID | Author | Message to the collection
 	const doc = {
 		username: author,
 		message: message,
 		commentID: commentID,
+		postID: postID,
 	};
 	const result = await collection.insertOne(doc);
+	return result;
+}
+
+export async function getAllComments() {
+	const collection = db.collection('comments');
+	const comments = await collection.find({}).toArray();
+	return comments;
 }
 
 export async function deleteComment(author, message) {

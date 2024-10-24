@@ -126,19 +126,14 @@ router.route('/register').post(async (req, res) => {
 });
 
 router.use(cookieParser());
-
 router.route('/login').post(async (req, res) => {
-	const { readFile, writeFile } = require('fs');
 	const { username, password } = req.body;
-	let data = req.body;
-	let val = data.username;
-	let val1 = data.password;
 	const db = await getDb('cse312');
 
 	//finding document with given username
 	const collection = db.collection('users');
 	const findResult = collection.find({
-		username: val,
+		username: username,
 	});
 
 	const allValues = [];
@@ -148,33 +143,9 @@ router.route('/login').post(async (req, res) => {
 	//if username is in database
 	if (allValues.length != 0) {
 		//checking if passwords match from database and front end.
-		const hashedPassword = await bcrypt.hash(val1, allValues[2]);
-		if (hashedPassword == allValues[1]) {
+		const isMatch = await bcrypt.compare(password, allValues[1]);
+		if (isMatch) {
 			const authcollection = db.collection('auth');
-
-			//getting authtoken based on username
-			const authfind = authcollection.find({
-				user: val,
-			});
-			const authValues = [];
-
-			for await (const doc of authfind) {
-				authValues.push(doc.username, doc.authtoken, doc.salt);
-			}
-
-			//if auth token has already been generated for this user
-			let hashedauth = '';
-			if (authValues.length != 0) {
-				const authtokenfromfront = req.cookies.auth;
-				hashedauth = await bcrypt.hash(authtokenfromfront, authValues[2]);
-			}
-
-			if (hashedauth == authValues[1]) {
-				//this would be the place to make the auth token functionallity work i think
-				//only hesitation is writting to the html so need to handle that
-				//that way the user never gets "logged in"""
-				//otherwise this functionallity is meanigless
-			}
 
 			//generates new auth token
 			const chars =
@@ -204,37 +175,10 @@ router.route('/login').post(async (req, res) => {
 			const old2 = {
 				user: allValues[0],
 			};
-			//<h3><i class="fas fa-user-circle"></i> User 1</h3>
-			let updatedHtml = '';
-			const path = require('path');
 			//deletes old auth token and inputs new one into database
 			const deleteResult2 = await collection2.deleteMany(old2);
 			const result2 = await collection2.insertOne(auth);
 
-			readFile(path.join('public', 'homepage.html'), (err, data) => {
-				if (err) {
-					return res.status(500).send('Error reading file');
-				}
-
-				const newer = Buffer.from(data).toString('ascii');
-				let user = allValues[0];
-				updatedHtml = newer.replace(
-					'<li class="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>',
-					'<li class="profile"><a href="#"><i class="fas fa-user"></i> ' +
-						user +
-						' </a></li>'
-				);
-				writeFile(
-					path.join('public', 'homepage.html'),
-					updatedHtml,
-					'utf8',
-					(err) => {
-						if (err) {
-							return res.status(500).send('Error writing the file');
-						}
-					}
-				);
-			});
 			res
 				.status(302)
 				.header({

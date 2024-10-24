@@ -7,6 +7,8 @@ import {
 	getAllPosts,
 	getLikesForPost,
 	updateLike,
+	createComment,
+	getAllComments,
 } from '../postStorage.js';
 
 router.route('/').post(async (req, res) => {
@@ -17,22 +19,19 @@ router.route('/').post(async (req, res) => {
 	}
 	// Get the currently logged in user from the auth cookie
 	const authToken = req.cookies.auth;
-	if (!authToken) {
-		return res.status(401).json({ error: 'User not authenticated' });
+	let user = 'guest'; // Default to guest if not logged in
+	if (authToken) {
+		const db = await getDb('cse312');
+		const authCollection = db.collection('auth');
+		const authDocs = await authCollection.find({}).toArray();
+		const authDoc = authDocs.find((doc) =>
+			bcrypt.compareSync(authToken, doc.authtoken)
+		);
+
+		if (authDoc) {
+			user = authDoc.user;
+		}
 	}
-
-	const db = await getDb('cse312');
-	const authCollection = db.collection('auth');
-	const authDocs = await authCollection.find({}).toArray();
-	const authDoc = authDocs.find((doc) =>
-		bcrypt.compareSync(authToken, doc.authtoken)
-	);
-
-	if (!authDoc) {
-		return res.status(401).json({ error: 'Invalid authentication token' });
-	}
-
-	const user = authDoc.user;
 
 	await createPost(user, postContent, postImage);
 
@@ -44,16 +43,18 @@ router.route('/').post(async (req, res) => {
 		})
 		.end();
 });
-
 router.route('/').get(async (req, res) => {
 	const posts = await getAllPosts();
 	const authToken = req.cookies.auth;
-	const db = await getDb('cse312');
-	const authCollection = db.collection('auth');
-	const authDocs = await authCollection.find({}).toArray();
-	const authDoc = authDocs.find((doc) =>
-		bcrypt.compareSync(authToken, doc.authtoken)
-	);
+	let authDoc = null;
+	if (authToken) {
+		const db = await getDb('cse312');
+		const authCollection = db.collection('auth');
+		const authDocs = await authCollection.find({}).toArray();
+		authDoc = authDocs.find((doc) =>
+			bcrypt.compareSync(authToken, doc.authtoken)
+		);
+	}
 
 	const updatedPosts = await Promise.all(
 		posts.map(async (post) => {
@@ -70,8 +71,6 @@ router.route('/').get(async (req, res) => {
 
 router.route('/like').post(async (req, res) => {
 	const { postID } = req.body;
-
-	console.log(postID);
 
 	const authToken = req.cookies.auth;
 	if (!authToken) {
@@ -93,6 +92,38 @@ router.route('/like').post(async (req, res) => {
 
 	await updateLike(userID, postID);
 	return res.status(200).json({ message: 'Like updated' });
+});
+
+router.route('/comment').post(async (req, res) => {
+	const { postID, commenter, comment } = req.body;
+
+	const authToken = req.cookies.auth;
+
+	let authDoc = null;
+	if (authToken) {
+		const db = await getDb('cse312');
+		const authCollection = db.collection('auth');
+		const authDocs = await authCollection.find({}).toArray();
+		authDoc = authDocs.find((doc) =>
+			bcrypt.compareSync(authToken, doc.authtoken)
+		);
+	}
+
+	const user = authToken ? authDoc?.user : 'guest'; // Default to guest if not logged in
+
+	await createComment(postID, user || commenter, comment);
+	return res
+		.status(302)
+		.header({
+			Location: '/homepage',
+			'X-Content-Type-Options': 'nosniff',
+		})
+		.end();
+});
+
+router.route('/comments').get(async (req, res) => {
+	const comments = await getAllComments();
+	return res.status(200).json(comments);
 });
 
 export default router;
