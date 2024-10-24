@@ -121,7 +121,7 @@ router.route('/login').post(async(req, res) => {
 			}
 
 		//if auth token has already been generated for this user
-		let hashedauth = ""
+		/*let hashedauth = ""
 		if(authValues.length != 0){
 			const authtokenfromfront = req.cookies.auth
 			hashedauth = await bcrypt.hash(authtokenfromfront, authValues[2]);
@@ -133,7 +133,7 @@ router.route('/login').post(async(req, res) => {
 			//only hesitation is writting to the html so need to handle that
 			//that way the user never gets "logged in"""
 			//otherwise this functionallity is meanigless
-		}
+		}*/
 
 	
 
