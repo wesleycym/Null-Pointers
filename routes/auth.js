@@ -221,13 +221,23 @@ router.route('/login').post(async (req, res) => {
 	});*/
 
 router.route('/logout').post(async (req, res) => {
+	const authToken = req.cookies.auth;
 
+	const db = await getDb('cse312');
+	const authCollection = db.collection('auth');
+	const authDocs = await authCollection.find({}).toArray();
+	if (authToken && authDocs.length > 0) {
+		const authDoc = authDocs.find((doc) =>
+			bcrypt.compareSync(authToken, doc.authtoken)
+		);
 
-	res.cookie('auth', '', {
-		maxAge: 60 * 60 * 1000,
-		httpOnly: true,
-		secure: false,
-	});
+		if (authDoc) {
+			await authCollection.deleteOne({ _id: authDoc._id });
+		}
+	}
+
+	res.clearCookie('auth');
+
 	res
 		.status(302)
 		.header({
