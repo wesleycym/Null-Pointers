@@ -110,19 +110,19 @@ function updatePageForUser() {
 					profileNameElement.innerHTML = `<a href="#"><i class="fas fa-user"></i> ${user.username}</a>`;
 					profileNameElement.classList.add('logged-in');
 
-					const authLink = document.querySelector('li.auth-link');
+					/*const authLink = document.querySelector('li.auth-link');
 					if (authLink) {
-						authLink.innerHTML = `<a href="/auth/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>`;
-					}
+						authLink.innerHTML = `<a href="/routes/auth/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>`;
+					}*/
 				}
 			}
 		})
-		.catch((error) => {
+		/*.catch((error) => {
 			const authLink = document.querySelector('li.auth-link');
 			if (authLink) {
-				authLink.innerHTML = `<a href="/"><i class="fa-solid fa-sign-in-alt"></i> Login</a>`;
+				authLink.innerHTML = `<a href="/"><i class="fa-solid fa-sign-in-alt"></i> Logout</a>`;
 			}
-		});
+		});*/
 }
 
 function showCommentForm(postID) {

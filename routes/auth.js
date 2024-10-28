@@ -221,15 +221,7 @@ router.route('/login').post(async (req, res) => {
 	});*/
 
 router.route('/logout').post(async (req, res) => {
-	const { readFile, writeFile, copyFile } = require('fs');
 
-	copyFile(
-		'../public/homepagebackup.html',
-		'../public/homepage.html',
-		(err) => {
-			if (err) throw err;
-		}
-	);
 
 	res.cookie('auth', '', {
 		maxAge: 60 * 60 * 1000,
