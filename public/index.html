@@ -21,8 +21,12 @@
 		<title>CSE 312 Project</title>
 	</head>
 	<body>
+		<img id="logo" src="img/ub logo.png" alt="UB Logo"> <!-- Logo -->
 		<h1>CSE 312 Project</h1>
-
+		<div class = "username">
+			<!--<h4>Username:</h4>
+			<input id="username" value= "{{username}}" name="username" hidden> -->
+		</div>
 		<div class="auth-forms">
 			<div class="register-form">
 				<h2>Register</h2>
@@ -37,14 +41,14 @@
 					/>
 					<input
 						type="password"
-						name="password"
+						name="password1"
 						placeholder="Password"
 					/>
-					<input 
-						type="password"
-						name="confirmPassword"
-						placeholder="Confirm Password"
-					/>
+					<input
+					type="password"
+					name="password2"
+					placeholder="Password"
+				/>
 					<button type="submit">Register</button>
 				</form>
 			</div>
@@ -65,7 +69,7 @@
 						placeholder="Password"
 					/>
 					<button type="submit">Login</button>
-				</form>
+			
 			</div>
 		</div>
 	</body>

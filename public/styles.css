@@ -33,4 +33,11 @@ body {
 	justify-content: center;
 	align-items: center;
 	height: 100vh;
+	overflow-y: hidden; /* Disable vertical scrolling  - was causing issues with the image generating white space */
+}
+
+#logo { /* For the ub logo */
+	width: 200px;
+	margin-bottom: 20px;
+	height: auto;
 }
