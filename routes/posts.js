@@ -58,11 +58,16 @@ router.route('/').get(async (req, res) => {
 
 	const updatedPosts = await Promise.all(
 		posts.map(async (post) => {
+			const user = authDoc ? authDoc.user : null;
 			const likesCount = await getLikesForPost(post.postID.toString());
-			const isLiked = authDoc
-				? await getLikesForPost(post.postID.toString(), authDoc.user)
-				: false;
-			return { ...post, likes: likesCount, isLiked: isLiked };
+			const db = await getDb('cse312');
+			const collection = db.collection('likes');
+			const existingLike = await collection
+				.find({ postID: post.postID.toString(), isLiked: true, userID: user })
+				.toArray();
+			const userLikesThisPost = existingLike.length > 0;
+
+			return { ...post, likes: likesCount, isLiked: userLikesThisPost };
 		})
 	);
 
