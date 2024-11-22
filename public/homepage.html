@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="homepage.css">
+
+    <link rel = "stylesheet" href = "directmessage.css"> <!-- Direct Message CSS -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="index.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -22,7 +25,11 @@
                 <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
                 <li class="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i> Explore</a></li>
-                <li><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
+
+                <li>
+                    <a href="#" id="messages-link"><i class="fas fa-envelope"></i> Messages</a>
+                </li> <!-- Messages Link -->
+
                 <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
                 <li class="auth-link">
                     <form action="/auth/logout" method="post">
@@ -34,6 +41,29 @@
             </ul>
         </nav>
     </header>
+
+    <div id="dm-popup" class="hidden">
+        <div id="dm-header">
+            <h3>Direct Messages</h3>
+            <button id="close-dm-popup">&times;</button>
+        </div>
+        <div id="dm-body">
+            <div id="dms-list">
+                <h4>Your Conversations</h4>
+                <ul id="dms-list-items">
+
+                    <!-- Shit should go here  -->
+                     
+                </ul>
+            </div>
+            <div id="new-dm">
+                <h4>Send a New Message</h4>
+                <input type="text" id="dm-recipient" placeholder="Recipient's username" />
+                <textarea id="dm-message" placeholder="Write your message"></textarea>
+                <button id="send-dm-btn">Send</button>
+            </div>
+        </div>
+    </div>
 
     <main>
         <!-- <section class="post-box">
