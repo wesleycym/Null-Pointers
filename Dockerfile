@@ -3,7 +3,9 @@ FROM node:18
 ENV NODE_ENV=development
 ENV PORT=8080
 
-WORKDIR /app
+WORKDIR /root
+COPY . .
+
 
 COPY package*.json ./
 

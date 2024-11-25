@@ -2,6 +2,13 @@ import { getDb } from '../mongo.js';
 import bcrypt from 'bcrypt';
 import express from 'express';
 const router = express.Router();
+import { v4 as uuidv4 } from 'uuid';  
+import fs from 'fs';
+
+import { ObjectId } from 'mongodb'; // import ObjectId | For creating postID
+
+// Global Variables
+const db = await getDb('cse312'); // connect to cse312
 import {
 	createPost,
 	getAllPosts,
@@ -11,15 +18,28 @@ import {
 	getAllComments,
 } from '../postStorage.js';
 
-router.route('/').post(async (req, res) => {
-	const { 'post-content': postContent, 'post-image': postImage } = req.body;
+const rawbody = (req) => {
+	return new Promise((resolve, reject) => {
+		let total = '';  
+		req.on('data', (chunk) => {
+		  total += chunk; 
+		});
+	  req.on('end', () => {
+		req.rawBody = total;  
+		resolve();  
+	  });
+  
+	  req.on('error', (err) => {
+		reject(err);  
+	  });
+	});
+  };
 
-	if (!postContent) {
-		return res.status(400).json({ error: 'Post content is required' });
-	}
-	// Get the currently logged in user from the auth cookie
+router.route('/').post(async (req, res) => {
 	const authToken = req.cookies.auth;
-	let user = 'guest'; // Default to guest if not logged in
+	let user = 'guest';
+	let filePath = '';
+	let i = ''; 
 	if (authToken) {
 		const db = await getDb('cse312');
 		const authCollection = db.collection('auth');
@@ -32,8 +52,38 @@ router.route('/').post(async (req, res) => {
 			user = authDoc.user;
 		}
 	}
+	const { 'post-content': postContent, 'post-image': postImage } = req.body;
+	const contentType = req.headers['content-type'];
 
-	await createPost(user, postContent, postImage);
+	if (contentType && contentType.includes('multipart/form-data')) {
+	await rawbody(req);
+
+	//parsing multipart?
+	const boundary = req.headers['content-type'].split('boundary=')[1];
+	const middleboundary = "--"+ boundary
+	 i = req.rawBody.split('\r\n\r\n')[1].split('\r\n--')[0];
+
+	
+	const randomName = uuidv4();  
+	filePath = './public/img/' + randomName + '.jpg';
+	await fs.promises.writeFile(filePath, i);
+	
+	const collection = db.collection('posts');
+	let message = "<img style='height: 240px; width: 240px; object-fit: contain'/>"
+  	const postID = new ObjectId();
+	const doc = {
+		username: user,
+		message: message,
+		postID: postID,
+	};
+	const result =  collection.insertOne(doc);
+	}
+	else{if (!postContent) {
+		return res.status(400).json({ error: 'Post content is required' });
+	}else{
+		await createPost(user, postContent);
+	}}
+
 
 	return res
 		.status(302)
