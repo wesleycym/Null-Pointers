@@ -13,7 +13,9 @@
 		"bcrypt": "^5.1.1",
 		"cookie-parser": "1.4.7",
 		"express": "^4.21.0",
-		"mongodb": "^6.9.0"
+		"mongodb": "^6.9.0",
+		"uuid":"11.0.3", 
+		"escape-html":"1.0.3"
 	},
 	"type": "module"
 }

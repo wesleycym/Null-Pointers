@@ -2,6 +2,15 @@ import { getDb } from '../mongo.js';
 import bcrypt from 'bcrypt';
 import express from 'express';
 const router = express.Router();
+import { v4 as uuidv4 } from 'uuid';  
+import fs from 'fs';
+import escapeHtml from 'escape-html';
+
+
+import { ObjectId } from 'mongodb'; // import ObjectId | For creating postID
+
+// Global Variables
+const db = await getDb('cse312'); // connect to cse312
 import {
 	createPost,
 	getAllPosts,
@@ -11,15 +20,29 @@ import {
 	getAllComments,
 } from '../postStorage.js';
 
-router.route('/').post(async (req, res) => {
-	const { 'post-content': postContent, 'post-image': postImage } = req.body;
+const rawdata = (req) => {
+	//gets full request keeping it in multipart/form-data so we can properly extract
+	return new Promise((resolve, reject) => {
+		let total = [];  
+		req.on('data', (chunk) => {
+		  total.push(chunk); 
+		});
+	  req.on('end', () => {
+		req.rawBody = Buffer.concat(total);  
+		resolve();  
+	  });
+  
+	  req.on('error', (err) => {
+		reject(err);  
+	  });
+	});
+  };
 
-	if (!postContent) {
-		return res.status(400).json({ error: 'Post content is required' });
-	}
-	// Get the currently logged in user from the auth cookie
+router.route('/').post(async (req, res) => {
+	//getting username
 	const authToken = req.cookies.auth;
-	let user = 'guest'; // Default to guest if not logged in
+	let user = 'guest';
+	let filePath = '';
 	if (authToken) {
 		const db = await getDb('cse312');
 		const authCollection = db.collection('auth');
@@ -31,10 +54,74 @@ router.route('/').post(async (req, res) => {
 		if (authDoc) {
 			user = authDoc.user;
 		}
-	}
+	}	
+	
+	//getting raw multipart request
+	await rawdata(req);
 
-	await createPost(user, postContent, postImage);
+	//spliting up the text
+	const boundary = req.headers['content-type'].split('boundary=')[1];
+	const middleboundary = "--"+ boundary
+	const other = req.rawBody.slice(middleboundary.length);
+	const end = other.indexOf(middleboundary);
+	const temp = other.slice(0, end)
+	const textstuff = 'Content-Disposition: form-data; name="post-content"'
+	let t = temp.indexOf(textstuff);
+	t = t + textstuff.length
+	const text  = temp.slice(t)
+	
+	//spliting up the image
+	const tempimage = other.slice(end+middleboundary.length)
+	const splitone = Buffer.from('\r\n\r\n', 'utf-8');
+	const splittwo = Buffer.from('\r\n--', 'utf-8');
+	const start = tempimage.indexOf(splitone);
+	const bodyStart = start + splitone.length;
+	const body = tempimage.slice(bodyStart); 
+	const starttwo = body.indexOf(splittwo);
+	const image = body.slice(0, starttwo);
 
+	//if there was an image and text
+	if(image.length > 1){
+
+		//creating new filename and writing it to disk
+		const randomName = uuidv4();  
+		filePath = './public/img/' + randomName + '.jpg';
+		await fs.promises.writeFile(filePath, image);
+		
+		//adding it to database 
+		const collection = db.collection('posts');
+		const database = '/img/' + randomName + '.jpg';
+		let tempmessage = escapeHtml(text);
+		let message = '<div style="width: 240px; height: 300px; overflow: hidden;"><img src="'
+		+ database + '"style="width: 100%; height: 100%; object-fit: contain;"></div>' + tempmessage;
+		const postID = new ObjectId();
+		const doc = {
+			username: user,
+			message: message,
+			postID: postID,
+		};
+		collection.insertOne(doc);
+		}
+
+		else{ 
+
+			//if there was only text
+			if(text.length>1){
+			let message = escapeHtml(text);
+			const postID = new ObjectId();
+			const doc = {
+				username: user,
+				message: message,
+				postID: postID,
+			};
+			const collection = db.collection('posts');
+			collection.insertOne(doc);
+			}else{
+				
+				//no text or image
+				return res.status(400).json({ error: 'Post content is required' });
+			}
+		}
 	return res
 		.status(302)
 		.header({
@@ -43,6 +130,7 @@ router.route('/').post(async (req, res) => {
 		})
 		.end();
 });
+
 router.route('/').get(async (req, res) => {
 	const posts = await getAllPosts();
 	const authToken = req.cookies.auth;
