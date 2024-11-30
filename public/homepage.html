@@ -26,7 +26,8 @@
                 <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
                 <li class="auth-link">
                     <form action="/auth/logout" method="post">
-                        <button type="submit" style="background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit;">
+                        <button type="submit"
+                            style="background: none; border: none; padding: 0; font: inherit; cursor: pointer; color: inherit;">
                             <i class="fa-solid fa-right-from-bracket"></i> Logout
                         </button>
                     </form>
@@ -44,35 +45,34 @@
         <section class="feed">
             <!-- Post Form -->
             <section class="post-box">
-                <form action="/posts" method="post" class="post-form"enctype="multipart/form-data">
+                <form action="/posts" method="post" class="post-form" enctype="multipart/form-data">
                     <textarea name="post-content" placeholder="What's happening?" rows="4" required></textarea><br>
                     Upload Image:
                     <input type="file" name="post-image">
                     <button type="submit"><i class="fa-solid fa-dumbbell"></i> Post</button>
                 </form>
             </section>
-    
-           
+
+
             <div class="comment-modal"></div>
-            
+
             <div class="posts"></div>
 
-            <!-- Comment Section -->
-            <!-- Using forms to write comments -->
 
-            <!-- Write a Comment -->
-            <!-- <div class="comment-section">
-                <div class="comment-input">
-                    <textarea placeholder="Write a comment" id="comment-box" rows="2"></textarea>
-                    <button type="submit" id="submit-comment"><i class="fas fa-paper-plane"></i>Reply</button>
-                </div> -->
-
-
-            <!-- Existing Comments -->
+            <!-- Websocket Interaction  -->
+            <section class="messages-section">
+                <h2>Direct Messages</h2>
+                <!-- fetch chat history and display them below -->
+                <div class="messages"></div>
+                <div class="message-input">
+                    <input type="text" id="recipient" placeholder="Recipient User ID" required />
+                    <textarea id="message-box" placeholder="Type your message..." rows="2"></textarea>
+                    <button id="send-message" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </section>
             </div>
-
-            <!-- More posts can go here -->
-
         </section>
     </main>
 

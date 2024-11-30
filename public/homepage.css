@@ -375,3 +375,59 @@ nav ul li a:hover::after {
 .submit-button:focus {
 	outline: none;
 }
+
+
+
+/* Websocket messages stylin */
+.messages-section {
+	margin-top: 20px;
+	border: 1px solid #ddd;
+	padding: 10px;
+	border-radius: 5px;
+	background-color: #f9f9f9;
+}
+
+.messages {
+	max-height: 200px;
+	overflow-y: auto;
+	margin-bottom: 10px;
+	padding: 5px;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	background: #fff;
+}
+
+.message {
+	margin-bottom: 5px;
+	padding: 5px;
+	border-bottom: 1px solid #eee;
+}
+
+.message-input {
+	display: flex;
+	flex-direction: column;
+}
+
+.message-input input,
+.message-input textarea {
+	margin-bottom: 10px;
+	padding: 8px;
+	font-size: 14px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+.message-input button {
+	align-self: flex-end;
+	padding: 8px 12px;
+	font-size: 14px;
+	color: #fff;
+	background-color: #007bff;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
+
+.message-input button:hover {
+	background-color: #0056b3;
+}
