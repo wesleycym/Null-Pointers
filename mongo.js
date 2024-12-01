@@ -9,7 +9,16 @@ export async function connectToCluster() {
 	let mongoClient;
 
 	try {
-		mongoClient = new MongoClient('mongodb://mongo:27017');
+		const username = process.env.MONGO_USER;
+		const password = process.env.MONGO_PASSWORD;
+		
+		if (!username || !password) {
+		  console.error('MongoDB credentials are missing!');
+		  process.exit(1);
+		}
+		
+		const connectionString = `mongodb://${username}:${encodeURIComponent(password)}@mongo:27017/admin`;
+		mongoClient = new MongoClient(connectionString);
 		console.log('Connecting to MongoDB...');
 		await mongoClient.connect();
 		console.log('Successfully connected to MongoDB.');
