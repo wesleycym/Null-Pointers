@@ -69,9 +69,17 @@ router.route('/').post(async (req, res) => {
 	let t = temp.indexOf(textstuff);
 	t = t + textstuff.length
 	const text  = temp.slice(t)
-	
+
+	//spliting up the delay
+	const tempdelay = other.slice(end+middleboundary.length)
+	const delaystuff = 'Content-Disposition: form-data; name="delay"'
+	let d = tempdelay.indexOf(delaystuff);
+	d = d + delaystuff.length
+	const val = tempdelay.indexOf(middleboundary)
+	let delay = tempdelay.slice(d, val)
+
 	//spliting up the image
-	const tempimage = other.slice(end+middleboundary.length)
+	const tempimage = tempdelay.slice(val+middleboundary.length)
 	const splitone = Buffer.from('\r\n\r\n', 'utf-8');
 	const splittwo = Buffer.from('\r\n--', 'utf-8');
 	const start = tempimage.indexOf(splitone);
@@ -87,7 +95,7 @@ router.route('/').post(async (req, res) => {
 		const randomName = uuidv4();  
 		filePath = './public/img/' + randomName + '.jpg';
 		await fs.promises.writeFile(filePath, image);
-		
+	 
 		//adding it to database 
 		const collection = db.collection('posts');
 		const database = '/img/' + randomName + '.jpg';
@@ -100,6 +108,8 @@ router.route('/').post(async (req, res) => {
 			message: message,
 			postID: postID,
 		};
+		//server.setTimeout(delay);
+		console.log("this is the delay: ", delay)
 		collection.insertOne(doc);
 		}
 
@@ -115,13 +125,24 @@ router.route('/').post(async (req, res) => {
 				postID: postID,
 			};
 			const collection = db.collection('posts');
+			//server.setTimeout(delay);
+			console.log("this is the delay: ", delay)
 			collection.insertOne(doc);
 			}else{
-				
 				//no text or image
 				return res.status(400).json({ error: 'Post content is required' });
 			}
 		}
+		cons
+	delay = 5000
+	const countdown = (() => {
+		if (delay>=0){
+		res.render('view', { message: 'Your Message will send in ' + delay + ' seconds!' })
+		delay = delay - 1000
+	}else{
+		res.render('view', { message: 'Your Message Has Been Sent!' })
+	}}, 1000);
+
 	return res
 		.status(302)
 		.header({
