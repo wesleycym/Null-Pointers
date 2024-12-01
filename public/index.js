@@ -83,18 +83,28 @@ function setupMessageForm() {
 }
 
 // Send a message via WebSocket
-function sendMessage(recipient, message) {
-	if (socket && socket.readyState === WebSocket.OPEN) {
-		const payload = {
-			type: 'direct_message',
-			recipient,
-			message,
-		};
-		socket.send(JSON.stringify(payload));
-		console.log('Message sent:', payload);
-	} else {
-		console.error('WebSocket is not connected');
-	}
+function sendMessage(recipient, message)
+{
+    console.log(`Sending message to ${recipient}: ${message}`);
+    
+    if (socket && socket.readyState === WebSocket.OPEN) // Check if the socket is open
+    {
+        socket.send(JSON.stringify({ // Send the message
+            type: "direct_message", // Send the type
+            recipient: recipient, // Send the recipient
+            message: message, // Send the message
+        }));
+
+        console.log(`Message sent to ${recipient}: ${message}`);
+
+        document.getElementById("dm-recipient").value = ""; // Clear the recipient
+        document.getElementById("dm-message").value = ""; // Clear the message
+
+    } else
+    {
+        console.log("Socket is not open");
+        alert("Failed to send message"); // Alert the user
+    }
 }
 
 // Add a new message to the DM UI
