@@ -1,0 +1,87 @@
+.hidden {
+    display: none !important; /* Added !important to override other styles*/
+}
+
+/* Popup window styling */
+#dm-popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 400px;
+    max-height: 500px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+/* Header styling */
+#dm-header {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#dm-header button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Body styling */
+#dm-body {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+#dms-list,
+#new-dm {
+    margin-bottom: 20px;
+}
+
+#dms-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+#dms-list ul li {
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+}
+
+#dms-list ul li:hover {
+    background-color: #f9f9f9;
+}
+
+#dm-recipient,
+#dm-message {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#send-dm-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#send-dm-btn:hover {
+    background-color: #0056b3;
+}
