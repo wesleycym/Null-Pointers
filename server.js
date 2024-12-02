@@ -60,6 +60,14 @@ app.get('/chat-messages', async (req, res) => {
 	}
 });
 
+app.get('/scripts/:filename', (req, res) => {
+	const filename = req.params.filename;
+	return res
+		.status(200)
+		.header({ 'Content-Type': 'application/javascript', 'X-Content-Type-Options': 'nosniff' })
+		.sendFile(path.join(process.cwd(), 'scripts', filename));
+});
+
 // 404 Handler (Place this last)
 app.use((req, res) => {
 	return res
