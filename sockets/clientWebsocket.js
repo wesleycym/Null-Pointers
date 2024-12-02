@@ -13,3 +13,5 @@ socket.addEventListener('close', () => {
 });
 
 export default socket;
+
+// There is no need to use this file

@@ -1,7 +1,6 @@
 console.log('Javascript is working!');
 
-// WebSocket variable
-let socket;
+let socket; // Websocket variable 
 
 document.addEventListener('DOMContentLoaded', () => {
 	initWebSocket();
@@ -23,14 +22,17 @@ function initWebSocket() {
 
 // Handle incoming WebSocket messages
 function handleIncomingMessage(event) {
-	const data = JSON.parse(event.data);
-	if (data.type === 'direct_message') {
-		addMessageToUI(data);
-	} else {
-		console.warn('Unhandled WebSocket message type:', data.type);
-	}
-}
+    const data = JSON.parse(event.data);
 
+    if (data.type === 'direct_message') {
+        // If the message is from the current user, ignore it to prevent duplicates
+        if (data.sender !== currentUsername) {
+            addMessageToUI(data);
+        }
+    } else {
+        console.warn('Unhandled WebSocket message type:', data.type);
+    }
+}
 // Setup the DM popup UI
 function setupDirectMessagePopup() {
 	const dmPopup = document.getElementById('dm-popup');
@@ -83,38 +85,45 @@ function setupMessageForm() {
 }
 
 // Send a message via WebSocket
-function sendMessage(recipient, message)
-{
+function sendMessage(recipient, message) {
     console.log(`Sending message to ${recipient}: ${message}`);
-    
-    if (socket && socket.readyState === WebSocket.OPEN) // Check if the socket is open
-    {
-        socket.send(JSON.stringify({ // Send the message
-            type: "direct_message", // Send the type
-            recipient: recipient, // Send the recipient
-            message: message, // Send the message
+
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            type: "direct_message",
+            recipient: recipient,
+            message: message,
         }));
 
         console.log(`Message sent to ${recipient}: ${message}`);
 
-        document.getElementById("dm-recipient").value = ""; // Clear the recipient
-        document.getElementById("dm-message").value = ""; // Clear the message
+        // Update the UI immediately
+        addMessageToUI({
+            sender: 'You', // Indicate that this message is from the sender
+            message: message,
+            timestamp: new Date(),
+        });
 
-    } else
-    {
+        document.getElementById("dm-recipient").value = "";
+        document.getElementById("dm-message").value = "";
+    } else {
         console.log("Socket is not open");
-        alert("Failed to send message"); // Alert the user
+        alert("Failed to send message");
     }
 }
 
 // Add a new message to the DM UI
 function addMessageToUI(data) {
-	const conversationsList = document.getElementById('dms-list-items');
-	const listItem = document.createElement('li');
-	listItem.textContent = `${data.sender}: ${data.message}`;
-	conversationsList.appendChild(listItem);
+    const conversationsList = document.getElementById('dms-list-items');
+    if (!conversationsList) {
+        console.error('Conversations list element not found');
+        return;
+    }
+    const listItem = document.createElement('li');
+    const sender = data.sender === currentUsername ? 'You' : data.sender;
+    listItem.textContent = `${sender}: ${data.message}`;
+    conversationsList.appendChild(listItem);
 }
-
 // Fetch and display posts
 function fetchAndDisplayPosts() {
 	axios.get('/posts')
@@ -149,17 +158,20 @@ function fetchAndDisplayPosts() {
 }
 
 // Update user details on the page
+let currentUsername = '';
+
 function updatePageForUser() {
-	axios.get('/auth/identity')
-		.then((response) => {
-			const user = response.data;
-			if (user && user.username) {
-				const profileElement = document.querySelector('li.profile');
-				profileElement.innerHTML = `<a href="#"><i class="fas fa-user"></i> ${user.username}</a>`;
-				profileElement.classList.add('logged-in');
-			}
-		})
-		.catch(console.error);
+    axios.get('/auth/identity')
+        .then((response) => {
+            const user = response.data;
+            if (user && user.username) {
+                currentUsername = user.username; // Set the current user's username
+                const profileElement = document.querySelector('li.profile');
+                profileElement.innerHTML = `<a href="#"><i class="fas fa-user"></i> ${user.username}</a>`;
+                profileElement.classList.add('logged-in');
+            }
+        })
+        .catch(console.error);
 }
 
 // Handle like button click

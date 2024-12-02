@@ -1,4 +1,3 @@
-
 import { WebSocketServer } from 'ws';
 import { getDb } from '../mongo.js';
 import bcrypt from 'bcrypt';
@@ -11,15 +10,15 @@ async function initWS(server) {
 
     wss.on('connection', async (ws, req) => {
         console.log('New WebSocket connection established');
-        let username = 'Guest';
-
+        let username = 'guest';
+    
         // Extract cookies from headers
         const cookies = req.headers.cookie?.split(';').reduce((acc, cookie) => {
             const [key, value] = cookie.trim().split('=');
             acc[key] = value;
             return acc;
         }, {});
-
+    
         const authToken = cookies?.auth;
         if (authToken) {
             try {
@@ -29,22 +28,23 @@ async function initWS(server) {
                 const authDoc = authDocs.find((doc) =>
                     bcrypt.compareSync(authToken, doc.authtoken)
                 );
-
+    
                 if (authDoc) {
-                    username = authDoc.user;
+                    username = authDoc.user.toLowerCase();
                 }
             } catch (error) {
                 console.error('Error authenticating user:', error);
             }
         }
-
+    
         clients.set(ws, username);
         console.log(`User ${username} connected`);
-
+    
         ws.on('message', async (message) => {
             try {
+                console.log(`Received message from ${username}: ${message}`);
                 const data = JSON.parse(message);
-
+    
                 if (data.type === 'direct_message') {
                     await handleDM(ws, username, data);
                 } else {
@@ -54,7 +54,7 @@ async function initWS(server) {
                 console.error('Error processing WebSocket message:', error);
             }
         });
-
+    
         ws.on('close', () => {
             console.log(`User ${username} disconnected`);
             clients.delete(ws);
@@ -72,29 +72,40 @@ async function handleDM(ws, senderUsername, data) {
         return;
     }
 
+    // Normalize usernames to ensure consistency
+    const normalizedRecipient = recipient.toLowerCase();
+    const normalizedSender = senderUsername.toLowerCase();
+
     const payload = {
-        sender: senderUsername,
-        recipient,
+        sender: normalizedSender,
+        recipient: normalizedRecipient,
         message,
         messageID: new ObjectId(),
         timestamp: new Date(),
     };
 
     try {
-        // Save message to the database
+        // Save the message to the database
         const db = await getDb('cse312');
         const messagesCollection = db.collection('messages');
         await messagesCollection.insertOne(payload);
 
-        // Find the recipient's WebSocket connection
+        // Send the message to both the recipient and the sender
         for (const [client, username] of clients.entries()) {
-            if (username === recipient && client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({
-                    type: 'direct_message',
-                    sender: senderUsername,
-                    message,
-                    timestamp: payload.timestamp,
-                }));
+            const normalizedUsername = username.toLowerCase();
+            if (
+                (normalizedUsername === normalizedRecipient ||
+                normalizedUsername === normalizedSender) &&
+                client.readyState === WebSocket.OPEN
+            ) {
+                client.send(
+                    JSON.stringify({
+                        type: 'direct_message',
+                        sender: senderUsername, // Use original case for display
+                        message,
+                        timestamp: payload.timestamp,
+                    })
+                );
             }
         }
     } catch (error) {
@@ -103,7 +114,6 @@ async function handleDM(ws, senderUsername, data) {
 }
 
 export { initWS };
-
 
 // import { WebSocketServer } from 'ws';
 // import express from 'express';
