@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://' + window.location.host + '/websocket');
+const socket = new WebSocket('wss://' + window.location.host + '/websocket');
 
 socket.addEventListener('open', () => {
     console.log('WebSocket connection established');

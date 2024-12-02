@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize WebSocket connection
 function initWebSocket() {
-	socket = new WebSocket('ws://' + window.location.host + '/websocket');
+	socket = new WebSocket('wss://' + window.location.host + '/websocket');
 	socket.onopen = () => console.log('WebSocket connection established');
 	socket.onmessage = handleIncomingMessage;
 	socket.onerror = (error) => console.error('WebSocket error:', error);
