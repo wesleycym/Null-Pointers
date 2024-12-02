@@ -24,6 +24,8 @@ function initWebSocket() {
 function handleIncomingMessage(event) {
     const data = JSON.parse(event.data);
 
+	console.log('Received message via WebSocket:', data); // Debug
+
     if (data.type === 'direct_message') {
         // If the message is from the current user, ignore it to prevent duplicates
         if (data.sender !== currentUsername) {

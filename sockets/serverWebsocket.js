@@ -1,7 +1,9 @@
-import { WebSocketServer } from 'ws';
+//import { WebSocketServer } from 'ws';
 import { getDb } from '../mongo.js';
 import bcrypt from 'bcrypt';
 import { ObjectId } from 'mongodb';
+
+import { WebSocketServer, WebSocket } from 'ws'; // Import WebSocketServer and WebSocket
 
 const clients = new Map();
 
@@ -72,7 +74,7 @@ async function handleDM(ws, senderUsername, data) {
         return;
     }
 
-    // Normalize usernames to ensure consistency
+    // Normalize usernames to lowercase
     const normalizedRecipient = recipient.toLowerCase();
     const normalizedSender = senderUsername.toLowerCase();
 
@@ -85,7 +87,7 @@ async function handleDM(ws, senderUsername, data) {
     };
 
     try {
-        // Save the message to the database
+        // Save message to the database
         const db = await getDb('cse312');
         const messagesCollection = db.collection('messages');
         await messagesCollection.insertOne(payload);
@@ -93,11 +95,14 @@ async function handleDM(ws, senderUsername, data) {
         // Send the message to both the recipient and the sender
         for (const [client, username] of clients.entries()) {
             const normalizedUsername = username.toLowerCase();
+            console.log(`Checking client with username: ${normalizedUsername}`); // Add this line
+
             if (
                 (normalizedUsername === normalizedRecipient ||
                 normalizedUsername === normalizedSender) &&
                 client.readyState === WebSocket.OPEN
             ) {
+                console.log(`Sending message to ${username}`); // Add this line
                 client.send(
                     JSON.stringify({
                         type: 'direct_message',
@@ -112,6 +117,7 @@ async function handleDM(ws, senderUsername, data) {
         console.error('Error handling direct message:', error);
     }
 }
+
 
 export { initWS };
 
