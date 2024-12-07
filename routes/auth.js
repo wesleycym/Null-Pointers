@@ -7,6 +7,27 @@ const require = createRequire(import.meta.url);
 const { Buffer } = require('node:buffer');
 import cookieParser from 'cookie-parser';
 
+
+var usernamesTest = new Map();
+var timeUpdate = new Map();
+
+
+function updateCounter() {
+		timeUpdate.forEach((value, key) => {
+			let i = usernamesTest.get(key)
+			if(i == 'ACTIVE'){
+				let newval = value + 1
+				timeUpdate.set(key, newval)
+			}else{
+				let newval = value - 1
+				timeUpdate.set(key, newval)
+			}
+			console.log(key, "has been " + i + " for: ", + value + " seconds");
+		  });
+}
+
+const counterInterval = setInterval(updateCounter, 1000);
+
 router.get('/identity', async (req, res) => {
 	console.log('identity');
 	const token = req.cookies.auth;
@@ -142,6 +163,9 @@ router.route('/login').post(async (req, res) => {
 	}
 	//if username is in database
 	if (allValues.length != 0) {
+		usernamesTest.set(username, "ACTIVE")
+		timeUpdate.set(username, 1)
+
 		//checking if passwords match from database and front end.
 		const isMatch = await bcrypt.compare(password, allValues[1]);
 		if (isMatch) {
@@ -222,7 +246,6 @@ router.route('/login').post(async (req, res) => {
 
 router.route('/logout').post(async (req, res) => {
 	const authToken = req.cookies.auth;
-
 	const db = await getDb('cse312');
 	const authCollection = db.collection('auth');
 	const authDocs = await authCollection.find({}).toArray();
@@ -233,7 +256,12 @@ router.route('/logout').post(async (req, res) => {
 
 		if (authDoc) {
 			await authCollection.deleteOne({ _id: authDoc._id });
+			let username = authDoc.user 
+			timeUpdate.set(username, 0)
+			usernamesTest.set(username, "OFFLINE")
+			console.log("these are the users: ", usernamesTest)
 		}
+
 	}
 
 	res.clearCookie('auth');

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	fetchAndDisplayPosts();
 	setInterval(fetchAndDisplayPosts, 5000);
 	updatePageForUser();
+	setupUserInfoPopup();
 });
 
 // Initialize WebSocket connection
@@ -57,7 +58,7 @@ function setupDirectMessagePopup() {
 // Fetch and display existing conversations
 async function fetchConversations() {
 	const conversationsList = document.getElementById('dms-list-items');
-	conversationsList.innerHTML = ''; // Clear previous items
+	conversationsList.innerHTML = ''; // Clear previous items 
 	try {
 		const response = await axios.get('/chat-messages');
 		if (response.status === 200) {
@@ -84,6 +85,55 @@ function setupMessageForm() {
 		}
 		sendMessage(recipient, message);
 	});
+}
+
+function setupUserInfoPopup() {
+	const UserLink  = document.getElementById("user-data"); // Get the messages link
+    const userPopup = document.getElementById("user-popup"); // Get the DM popup
+    const closePopupBtnUser = document.getElementById("close-user-popup"); // Ge
+	// Open DM popup
+	UserLink.addEventListener('click', (e) => {
+		e.preventDefault();
+		const userList = document.getElementById('user-list-items'); // Get the <ul> element
+		userPopup.classList.remove('hidden');
+		console.log
+		if(timeUpdate.length > 0){
+			timeUpdate.forEach((value, key) => {
+			const newItem = document.createElement('li'); 
+			newItem.textContent = key + " has been active for " + value + " seconds."; 
+			userList.appendChild(newItem);
+			})
+		}else{
+			const newItem = document.createElement('li'); 
+			newItem.textContent = "No Signed In Users Yet!"; 
+			userList.appendChild(newItem); // Output: 'key1'
+		}
+		//for(let i = 0; i < usernamesTest.length; i++){
+		
+		
+		//}
+		
+		Usernames()
+	});
+
+	// Close DM popup
+	closePopupBtnUser.addEventListener('click', () => {
+		userPopup.classList.add('hidden');
+	});
+}
+//async function getUserNames(){
+//	const db = await getDb('cse312'); // connect to cse312
+
+async function Usernames() {
+	const conversationsList = document.getElementById('user-list-items');
+    if (!conversationsList) {
+        console.error('Conversations list element not found');
+        return;
+    }
+    const listItem = document.createElement('li');
+    const sender = data.sender;
+    listItem.textContent = `Kate: OFFLINE`;
+    conversationsList.appendChild(listItem);
 }
 
 // Send a message via WebSocket

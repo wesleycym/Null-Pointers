@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="homepage.css">
     <link rel="stylesheet" href="directmessage.css"> <!-- Direct Message CSS -->
 
+    <script src="auth.js" defer></script>
     <script src="dm.js" defer></script> <!-- For opening and closing the box -->
 
     <!--<script src="sendDM.js" defer></script> <!-- Send DM button logic -->
@@ -28,7 +29,7 @@
             <ul class="nav-links">
                 <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
                 <li class="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i> Explore</a></li>
+                <li><a href="#" id = "user-data"><i class="fa-solid fa-magnifying-glass"></i> User List</a></li>
                 <li><a href="#" id="messages-link"><i class="fas fa-envelope"></i> Messages</a></li>
                 <!-- Messages Link -->
                 <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
@@ -63,6 +64,22 @@
             </div>
         </div>
     </div>
+
+    <div id="user-popup" class="hidden">
+        <!-- DM Popup -->
+        <div id="user-header">
+            <h3>Active Users</h3>
+            <button id="close-user-popup">&times;</button>
+        </div>
+        <div id="user-body">
+            <div id="user-list">
+                <ul id="user-list-items"></ul> <!-- Dynamically populated list -->
+            </div>
+        </div>
+    </div>
+
+
+    
 
     <main>
         <section class="feed">
