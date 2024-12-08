@@ -8,21 +8,26 @@ const { Buffer } = require('node:buffer');
 import cookieParser from 'cookie-parser';
 
 
-var usernamesTest = new Map();
-var timeUpdate = new Map();
+global.timeUpdate = new Map();
+global.usernamesTest = new Map();
 
+export function returnUsernamesTest(){
+	return usernamesTest
+}
+export function returnTimeUpdate(){
+	return timeUpdate
+}
 
 function updateCounter() {
-		timeUpdate.forEach((value, key) => {
-			let i = usernamesTest.get(key)
+		global.timeUpdate.forEach((value, key) => {
+			let i = global.usernamesTest.get(key)
 			if(i == 'ACTIVE'){
 				let newval = value + 1
-				timeUpdate.set(key, newval)
+				global.timeUpdate.set(key, newval)
 			}else{
 				let newval = value - 1
-				timeUpdate.set(key, newval)
+				global.timeUpdate.set(key, newval)
 			}
-			console.log(key, "has been " + i + " for: ", + value + " seconds");
 		  });
 }
 
@@ -163,8 +168,8 @@ router.route('/login').post(async (req, res) => {
 	}
 	//if username is in database
 	if (allValues.length != 0) {
-		usernamesTest.set(username, "ACTIVE")
-		timeUpdate.set(username, 1)
+		global.usernamesTest.set(username, "ACTIVE")
+		global.timeUpdate.set(username, 1)
 
 		//checking if passwords match from database and front end.
 		const isMatch = await bcrypt.compare(password, allValues[1]);
@@ -258,8 +263,8 @@ router.route('/logout').post(async (req, res) => {
 			await authCollection.deleteOne({ _id: authDoc._id });
 			let username = authDoc.user 
 			timeUpdate.set(username, 0)
-			usernamesTest.set(username, "OFFLINE")
-			console.log("these are the users: ", usernamesTest)
+			global.usernamesTest.set(username, "OFFLINE")
+			console.log("these are the users: ", global.usernamesTest)
 		}
 
 	}

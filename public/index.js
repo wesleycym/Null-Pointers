@@ -94,20 +94,24 @@ function setupUserInfoPopup() {
 	// Open DM popup
 	UserLink.addEventListener('click', (e) => {
 		e.preventDefault();
+		//let usernamesTest = returnUsernamesTest();
+		//let timeUpdate = returnTimeUpdate();
 		const userList = document.getElementById('user-list-items'); // Get the <ul> element
 		userPopup.classList.remove('hidden');
 		console.log
-		if(timeUpdate.length > 0){
+		/*if(timeUpdate.length > 0){
 			timeUpdate.forEach((value, key) => {
-			const newItem = document.createElement('li'); 
-			newItem.textContent = key + " has been active for " + value + " seconds."; 
-			userList.appendChild(newItem);
-			})
-		}else{
-			const newItem = document.createElement('li'); 
-			newItem.textContent = "No Signed In Users Yet!"; 
-			userList.appendChild(newItem); // Output: 'key1'
-		}
+				let i = usernamesTest.get(key)
+				const newItem = document.createElement('li'); 
+				newItem.textContent = key, "has been " + i + " for: ", + value + " seconds"; 
+				userList.appendChild(newItem);
+		});
+	}*/
+		//}else{
+		///	const newItem = document.createElement('li'); 
+			//newItem.textContent = "No Signed In Users Yet!"; 
+			//userList.appendChild(newItem); // Output: 'key1'
+		//}
 		//for(let i = 0; i < usernamesTest.length; i++){
 		
 		
