@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>   
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="homepage.css">
@@ -18,10 +18,11 @@
 
     <title>Homepage</title>
 </head>
- <script>
+<script>
     // Implicitly, this will be attached to window
     globalThis.globalVar = "I am a global variable!";
-  </script>
+</script>
+
 <body>
     <header>
         <nav>
@@ -31,7 +32,7 @@
             <ul class="nav-links">
                 <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
                 <li class="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="#" id = "user-data"><i class="fa-solid fa-magnifying-glass"></i> User List</a></li>
+                <li><a href="#" id="user-data"><i class="fa-solid fa-magnifying-glass"></i> User List</a></li>
                 <li><a href="#" id="messages-link"><i class="fas fa-envelope"></i> Messages</a></li>
                 <!-- Messages Link -->
                 <button>Invert Colors</button>
@@ -40,7 +41,7 @@
                     function toggleInvert() {
                         document.body.classList.toggle('inverted');
                     }
-            
+
                     // Example: Add an event listener to the button for toggling inversion
                     const button = document.querySelector('button');
                     button.addEventListener('click', toggleInvert);
