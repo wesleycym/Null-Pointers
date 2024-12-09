@@ -35,8 +35,6 @@ const counterInterval = setInterval(updateCounter, 1000);
 
 router.get('/active-users', (req, res) => {
 	const activeUsers = [];
-
-	// Iterate through global.usernamesTest to collect active users
 	global.usernamesTest.forEach((status, username) => {
 		if (status === 'ACTIVE') {
 			const timeActive = global.timeUpdate.get(username) || 0;
@@ -159,7 +157,6 @@ router.route('/register').post(async (req, res) => {
 			}
 		}
 	}
-
 	res
 		.status(302)
 		.header({

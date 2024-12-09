@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	updatePageForUser();
 	setupUserInfoPopup();
 	fetchAndDisplayActiveUsers();
-	setInterval(fetchAndDisplayActiveUsers, 5000);
+	setInterval(fetchAndDisplayActiveUsers, 1000);
 });
 
 // Initialize WebSocket connection
@@ -96,14 +96,9 @@ function setupUserInfoPopup() {
 	// Open DM popup
 	UserLink.addEventListener('click', (e) => {
 		e.preventDefault();
-		//let usernamesTest = returnUsernamesTest();
-		//let timeUpdate = returnTimeUpdate();
-		// Get the <ul> element
 		userPopup.classList.remove('hidden');
 		console.log
 		fetchAndDisplayActiveUsers();
-
-
 	});
 
 	// Close DM popup
@@ -111,20 +106,7 @@ function setupUserInfoPopup() {
 		userPopup.classList.add('hidden');
 	});
 }
-//async function getUserNames(){
-//	const db = await getDb('cse312'); // connect to cse312
 
-async function Usernames() {
-	const conversationsList = document.getElementById('user-list-items');
-	if (!conversationsList) {
-		console.error('Conversations list element not found');
-		return;
-	}
-	const listItem = document.createElement('li');
-	const sender = data.sender;
-	listItem.textContent = `Kate: OFFLINE`;
-	conversationsList.appendChild(listItem);
-}
 
 // Send a message via WebSocket
 function sendMessage(recipient, message) {
@@ -218,21 +200,6 @@ function updatePageForUser() {
 
 }
 
-// function updatePageActiveUsers() {
-// 	axios.get('/auth/active-users')
-// 		.then((response) => {
-// 			const user = response.data;
-// 			if (user && user.username) {
-// 				currentUsername = user.username; // Set the current user's username
-// 				const profileElement = document.querySelector('li.profile');
-// 				profileElement.innerHTML = `<a href="#"><i class="fas fa-user"></i> ${user.username}</a>`;
-// 				profileElement.classList.add('logged-in');
-// 			}
-// 		})
-// 		.catch(console.error);
-
-
-// }
 
 // Handle like button click
 function handleLikeButtonClick(postID) {
@@ -247,17 +214,27 @@ function handleLikeButtonClick(postID) {
 async function fetchAndDisplayActiveUsers() {
 	try {
 		const response = await axios.get('/auth/active-users'); // Fetch active users from the server
-		const userList = document.getElementById('user-list-items'); // The <ul> element
-		//userList.innerHTML = ''; // Clear previous items
-
-		// Populate the list with active users and their active times
+		const userList = document.getElementById('user-list-items'); 
+		userList.textContent = ''
 		response.data.forEach((user) => {
-
 			const listItem = document.createElement('li');
-			// if user.username in clients:
+			var time = user.timeActive
+			if(time < 60){
+				listItem.textContent = `${user.username}: Active for ${user.timeActive} seconds`;
+				userList.appendChild(listItem);
+			}
+			if(time > 60){
+				time = Math.floor(user.timeActive/60)
+				if (time == 1){
+					listItem.textContent = `${user.username}: Active for ${Math.floor(user.timeActive/60)} minute`;
+					userList.appendChild(listItem);
+				}else{
+					listItem.textContent = `${user.username}: Active for ${Math.floor(user.timeActive/60)} minutes`;
+					userList.appendChild(listItem);
+				}
 
-			listItem.textContent = `${user.username}: Active for ${user.timeActive} seconds`;
-			userList.appendChild(listItem);
+			}
+			
 		});
 	} catch (error) {
 		console.error('Error fetching active users:', error);
