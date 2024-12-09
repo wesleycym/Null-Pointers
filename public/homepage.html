@@ -18,6 +18,10 @@
 
     <title>Homepage</title>
 </head>
+<script>
+    // Implicitly, this will be attached to window
+    globalThis.globalVar = "I am a global variable!";
+</script>
 
 <body>
     <header>
@@ -28,9 +32,20 @@
             <ul class="nav-links">
                 <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
                 <li class="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>
-                <li><a href="#"><i class="fa-solid fa-magnifying-glass"></i> Explore</a></li>
+                <li><a href="#" id="user-data"><i class="fa-solid fa-magnifying-glass"></i> User List</a></li>
                 <li><a href="#" id="messages-link"><i class="fas fa-envelope"></i> Messages</a></li>
                 <!-- Messages Link -->
+                <button>Invert Colors</button>
+                <script>
+                    // Function to toggle the 'inverted' class on body
+                    function toggleInvert() {
+                        document.body.classList.toggle('inverted');
+                    }
+
+                    // Example: Add an event listener to the button for toggling inversion
+                    const button = document.querySelector('button');
+                    button.addEventListener('click', toggleInvert);
+                </script>
                 <li><a href="#"><i class="fas fa-bell"></i> Notifications</a></li>
                 <li class="auth-link">
                     <form action="/auth/logout" method="post">
@@ -43,7 +58,18 @@
             </ul>
         </nav>
     </header>
-
+    <div id="user-popup" class="hidden">
+        <!-- DM Popup -->
+        <div id="user-header">
+            <h3>Active Users</h3>
+            <button id="close-user-popup">&times;</button>
+        </div>
+        <div id="user-body">
+            <div id="user-list">
+                <ul id="user-list-items"></ul> <!-- Dynamically populated list -->
+            </div>
+        </div>
+    </div>
     <div id="dm-popup" class="hidden">
         <!-- DM Popup -->
         <div id="dm-header">

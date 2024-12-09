@@ -375,3 +375,8 @@ nav ul li a:hover::after {
 .submit-button:focus {
 	outline: none;
 }
+
+body.inverted {
+    filter: invert(1) hue-rotate(180deg); /* Invert colors */
+	--secondary-color: #333;
+}
