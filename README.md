@@ -1,3 +1,1 @@
-# Null-Pointers
-
-Deployed app: [https://lockin.social](https://lockin.social)
+Deployed app: https://lockin.social

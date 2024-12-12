@@ -7,6 +7,48 @@ const require = createRequire(import.meta.url);
 const { Buffer } = require('node:buffer');
 import cookieParser from 'cookie-parser';
 
+
+global.timeUpdate = new Map();
+global.usernamesTest = new Map();
+
+export function returnUsernamesTest() {
+	return usernamesTest
+}
+export function returnTimeUpdate() {
+	return timeUpdate
+}
+
+function updateCounter() {
+	global.timeUpdate.forEach((value, key) => {
+		let i = global.usernamesTest.get(key)
+		if (i == 'ACTIVE') {
+			let newval = value + 1
+			global.timeUpdate.set(key, newval)
+		} else {
+			let newval = value - 1
+			global.timeUpdate.set(key, newval)
+		}
+	});
+}
+
+const counterInterval = setInterval(updateCounter, 1000);
+
+router.get('/active-users', (req, res) => {
+	const activeUsers = [];
+	global.usernamesTest.forEach((status, username) => {
+		if (status === 'ACTIVE') {
+			const timeActive = global.timeUpdate.get(username) || 0;
+			activeUsers.push({ username, timeActive });
+		}
+	});
+
+	// Send active users as a JSON response
+	res.status(200).json(activeUsers);
+});
+
+
+
+
 router.get('/identity', async (req, res) => {
 	console.log('identity');
 	const token = req.cookies.auth;
@@ -115,7 +157,6 @@ router.route('/register').post(async (req, res) => {
 			}
 		}
 	}
-
 	res
 		.status(302)
 		.header({
@@ -142,6 +183,9 @@ router.route('/login').post(async (req, res) => {
 	}
 	//if username is in database
 	if (allValues.length != 0) {
+		global.usernamesTest.set(username, "ACTIVE")
+		global.timeUpdate.set(username, 1)
+
 		//checking if passwords match from database and front end.
 		const isMatch = await bcrypt.compare(password, allValues[1]);
 		if (isMatch) {
@@ -222,7 +266,6 @@ router.route('/login').post(async (req, res) => {
 
 router.route('/logout').post(async (req, res) => {
 	const authToken = req.cookies.auth;
-
 	const db = await getDb('cse312');
 	const authCollection = db.collection('auth');
 	const authDocs = await authCollection.find({}).toArray();
@@ -233,7 +276,12 @@ router.route('/logout').post(async (req, res) => {
 
 		if (authDoc) {
 			await authCollection.deleteOne({ _id: authDoc._id });
+			let username = authDoc.user
+			timeUpdate.set(username, 0)
+			global.usernamesTest.set(username, "OFFLINE")
+			console.log("these are the users: ", global.usernamesTest)
 		}
+
 	}
 
 	res.clearCookie('auth');
@@ -246,5 +294,7 @@ router.route('/logout').post(async (req, res) => {
 		})
 		.end();
 });
+
+
 
 export default router;
