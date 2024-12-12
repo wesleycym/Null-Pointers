@@ -1,4 +1,3 @@
-
 import express from 'express';
 import path from 'path';
 import bcrypt from 'bcrypt';
@@ -6,7 +5,9 @@ import { getDb } from './mongo.js';
 import cookieParser from 'cookie-parser';
 import { createRequire } from 'module';
 import { initWS } from './sockets/serverWebsocket.js';
-import { createServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
+import { createServer as createHttpServer } from 'http';
+import fs from 'fs';
 
 const require = createRequire(import.meta.url);
 const app = express();
@@ -21,27 +22,41 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Serve Static Files
 app.use(
 	express.static('public', {
 		setHeaders: (res) => {
 			res.set('X-Content-Type-Options', 'nosniff');
-		},
+		}
 	})
 );
+
+if (nodeEnv === 'production') {
+	app.use((req, res, next) => {
+		if (!req.secure) {
+			return res.redirect(`https://${req.headers.host}${req.url}`);
+		}
+		next();
+	});
+}
 
 // Routes
 app.get('/', (req, res) => {
 	return res
 		.status(200)
-		.header({ 'Content-Type': 'text/html', 'X-Content-Type-Options': 'nosniff' })
+		.header({
+			'Content-Type': 'text/html',
+			'X-Content-Type-Options': 'nosniff'
+		})
 		.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
 app.get('/homepage', (req, res) => {
 	return res
 		.status(200)
-		.header({ 'Content-Type': 'text/html', 'X-Content-Type-Options': 'nosniff' })
+		.header({
+			'Content-Type': 'text/html',
+			'X-Content-Type-Options': 'nosniff'
+		})
 		.sendFile(path.join(process.cwd(), 'public', 'homepage.html'));
 });
 
@@ -52,7 +67,11 @@ app.use('/posts', postRouter);
 app.get('/chat-messages', async (req, res) => {
 	try {
 		const db = await getDb('cse312');
-		const messages = await db.collection('messages').find().sort({ timestamp: 1 }).toArray();
+		const messages = await db
+			.collection('messages')
+			.find()
+			.sort({ timestamp: 1 })
+			.toArray();
 		res.status(200).json(messages);
 	} catch (error) {
 		console.error('Error fetching chat messages:', error);
@@ -64,29 +83,54 @@ app.get('/scripts/:filename', (req, res) => {
 	const filename = req.params.filename;
 	return res
 		.status(200)
-		.header({ 'Content-Type': 'application/javascript', 'X-Content-Type-Options': 'nosniff' })
+		.header({
+			'Content-Type': 'application/javascript',
+			'X-Content-Type-Options': 'nosniff'
+		})
 		.sendFile(path.join(process.cwd(), 'scripts', filename));
 });
 
-// 404 Handler (Place this last)
 app.use((req, res) => {
 	return res
 		.status(404)
-		.header({ 'Content-Type': 'text/html', 'X-Content-Type-Options': 'nosniff' })
+		.header({
+			'Content-Type': 'text/html',
+			'X-Content-Type-Options': 'nosniff'
+		})
 		.sendFile(path.join(process.cwd(), 'public', '404.html'));
 });
 
-// Create HTTP Server
-const httpServer = createServer(app);
+let server;
 
-// Initialize WebSocket Server
-initWS(httpServer);
+if (nodeEnv === 'development') {
+	server = createHttpServer(app);
+} else {
+	try {
+		server = createHttpsServer(
+			{
+				cert: fs.readFileSync('/etc/letsencrypt/live/lockin.social/cert.pem'),
+				key: fs.readFileSync('/etc/letsencrypt/live/lockin.social/privkey.pem')
+			},
+			app
+		);
+	} catch (error) {
+		console.error('Failed to load SSL certificates:', error);
+		console.log('Falling back to HTTP server');
+		server = createHttpServer(app);
+	}
+}
 
-// Start the Server
-httpServer.listen(port, () => {
-	console.log(`Server running on port ${port} in ${nodeEnv} mode`);
+initWS(server);
+
+server.listen(port, () => {
+	const protocol = nodeEnv === 'production' ? 'HTTPS' : 'HTTP';
+	console.log(`${protocol} Server running on port ${port} in ${nodeEnv} mode`);
 });
 
-
-
-
+process.on('SIGTERM', () => {
+	console.log('SIGTERM signal received: closing server');
+	server.close(() => {
+		console.log('Server closed');
+		process.exit(0);
+	});
+});
