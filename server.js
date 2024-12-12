@@ -90,18 +90,13 @@ app.get('/scripts/:filename', (req, res) => {
 		.sendFile(path.join(process.cwd(), 'scripts', filename));
 });
 
-app.use((req, res) => {
-	return res
-		.status(404)
-		.header({
-			'Content-Type': 'text/html',
-			'X-Content-Type-Options': 'nosniff'
-		})
-		.sendFile(path.join(process.cwd(), 'public', '404.html'));
+app.get('/websocket', (req, res, next) => {
+	res.setHeader('Upgrade', 'websocket');
+	res.setHeader('Connection', 'Upgrade');
+	next();
 });
 
 let server;
-
 if (nodeEnv === 'development') {
 	server = createHttpServer(app);
 } else {
@@ -121,6 +116,16 @@ if (nodeEnv === 'development') {
 }
 
 initWS(server);
+
+app.use((req, res) => {
+	return res
+		.status(404)
+		.header({
+			'Content-Type': 'text/html',
+			'X-Content-Type-Options': 'nosniff'
+		})
+		.sendFile(path.join(process.cwd(), 'public', '404.html'));
+});
 
 server.listen(port, () => {
 	const protocol = nodeEnv === 'production' ? 'HTTPS' : 'HTTP';
