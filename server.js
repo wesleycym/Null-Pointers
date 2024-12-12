@@ -8,20 +8,18 @@ import { initWS } from './sockets/serverWebsocket.js';
 import { createServer as createHttpsServer } from 'https';
 import { createServer as createHttpServer } from 'http';
 import fs from 'fs';
+import authRouter from './routes/auth.js';
+import postRouter from './routes/posts.js';
 
 const require = createRequire(import.meta.url);
 const app = express();
 const port = process.env.PORT || 8080;
 const nodeEnv = process.env.NODE_ENV || 'development';
 
-import authRouter from './routes/auth.js';
-import postRouter from './routes/posts.js';
-
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.use(
 	express.static('public', {
 		setHeaders: (res) => {
@@ -30,6 +28,7 @@ app.use(
 	})
 );
 
+// HTTPS redirect in production
 if (nodeEnv === 'production') {
 	app.use((req, res, next) => {
 		if (!req.secure) {
@@ -38,6 +37,32 @@ if (nodeEnv === 'production') {
 		next();
 	});
 }
+
+// Create server first
+let server;
+if (nodeEnv === 'development') {
+	server = createHttpServer(app);
+} else {
+	try {
+		const certPath = '/etc/letsencrypt/live/lockin.social/cert.pem';
+		const keyPath = '/etc/letsencrypt/live/lockin.social/privkey.pem';
+
+		server = createHttpsServer(
+			{
+				cert: fs.readFileSync(certPath),
+				key: fs.readFileSync(keyPath)
+			},
+			app
+		);
+	} catch (error) {
+		console.error('Failed to load SSL certificates:', error);
+		console.log('Falling back to HTTP server');
+		server = createHttpServer(app);
+	}
+}
+
+// Initialize WebSocket before routes
+initWS(server);
 
 // Routes
 app.get('/', (req, res) => {
@@ -90,33 +115,7 @@ app.get('/scripts/:filename', (req, res) => {
 		.sendFile(path.join(process.cwd(), 'scripts', filename));
 });
 
-app.get('/websocket', (req, res, next) => {
-	res.setHeader('Upgrade', 'websocket');
-	res.setHeader('Connection', 'Upgrade');
-	next();
-});
-
-let server;
-if (nodeEnv === 'development') {
-	server = createHttpServer(app);
-} else {
-	try {
-		server = createHttpsServer(
-			{
-				cert: fs.readFileSync('/etc/letsencrypt/live/lockin.social/cert.pem'),
-				key: fs.readFileSync('/etc/letsencrypt/live/lockin.social/privkey.pem')
-			},
-			app
-		);
-	} catch (error) {
-		console.error('Failed to load SSL certificates:', error);
-		console.log('Falling back to HTTP server');
-		server = createHttpServer(app);
-	}
-}
-
-initWS(server);
-
+// 404 handler (must be last)
 app.use((req, res) => {
 	return res
 		.status(404)
@@ -127,11 +126,18 @@ app.use((req, res) => {
 		.sendFile(path.join(process.cwd(), 'public', '404.html'));
 });
 
+// Start server
 server.listen(port, () => {
 	const protocol = nodeEnv === 'production' ? 'HTTPS' : 'HTTP';
 	console.log(`${protocol} Server running on port ${port} in ${nodeEnv} mode`);
 });
 
+// Error handling
+server.on('error', (error) => {
+	console.error('Server error:', error);
+});
+
+// Graceful shutdown
 process.on('SIGTERM', () => {
 	console.log('SIGTERM signal received: closing server');
 	server.close(() => {

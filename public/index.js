@@ -1,6 +1,6 @@
 console.log('Javascript is working!');
 
-let socket; // Websocket variable 
+let socket; // Websocket variable
 // let clients = set();
 document.addEventListener('DOMContentLoaded', () => {
 	initWebSocket();
@@ -16,13 +16,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize WebSocket connection
 function initWebSocket() {
-	socket = new WebSocket('wss://' + window.location.host + '/websocket');
-	socket.onopen = () => console.log('WebSocket connection established');
-	socket.onmessage = handleIncomingMessage;
-	socket.onerror = (error) => console.error('WebSocket error:', error);
-	socket.onclose = () => console.log('WebSocket connection closed');
-}
+	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	socket = new WebSocket(`${protocol}//${window.location.host}/websocket`);
 
+	socket.onopen = () => {
+		console.log('WebSocket connection established');
+	};
+
+	socket.onmessage = handleIncomingMessage;
+
+	socket.onerror = (error) => {
+		console.error('WebSocket error:', error);
+		// Try to reconnect after error
+		setTimeout(initWebSocket, 5000);
+	};
+
+	socket.onclose = () => {
+		console.log('WebSocket connection closed');
+		// Try to reconnect after close
+		setTimeout(initWebSocket, 5000);
+	};
+}
 // Handle incoming WebSocket messages
 function handleIncomingMessage(event) {
 	const data = JSON.parse(event.data);
@@ -60,7 +74,7 @@ function setupDirectMessagePopup() {
 // Fetch and display existing conversations
 async function fetchConversations() {
 	const conversationsList = document.getElementById('dms-list-items');
-	conversationsList.innerHTML = ''; // Clear previous items 
+	conversationsList.innerHTML = ''; // Clear previous items
 	try {
 		const response = await axios.get('/chat-messages');
 		if (response.status === 200) {
@@ -90,14 +104,14 @@ function setupMessageForm() {
 }
 
 function setupUserInfoPopup() {
-	const UserLink = document.getElementById("user-data"); // Get the messages link
-	const userPopup = document.getElementById("user-popup"); // Get the DM popup
-	const closePopupBtnUser = document.getElementById("close-user-popup"); // Ge
+	const UserLink = document.getElementById('user-data'); // Get the messages link
+	const userPopup = document.getElementById('user-popup'); // Get the DM popup
+	const closePopupBtnUser = document.getElementById('close-user-popup'); // Ge
 	// Open DM popup
 	UserLink.addEventListener('click', (e) => {
 		e.preventDefault();
 		userPopup.classList.remove('hidden');
-		console.log
+		console.log;
 		fetchAndDisplayActiveUsers();
 	});
 
@@ -107,17 +121,18 @@ function setupUserInfoPopup() {
 	});
 }
 
-
 // Send a message via WebSocket
 function sendMessage(recipient, message) {
 	console.log(`Sending message to ${recipient}: ${message}`);
 
 	if (socket && socket.readyState === WebSocket.OPEN) {
-		socket.send(JSON.stringify({
-			type: "direct_message",
-			recipient: recipient,
-			message: message,
-		}));
+		socket.send(
+			JSON.stringify({
+				type: 'direct_message',
+				recipient: recipient,
+				message: message
+			})
+		);
 
 		console.log(`Message sent to ${recipient}: ${message}`);
 
@@ -125,14 +140,14 @@ function sendMessage(recipient, message) {
 		addMessageToUI({
 			sender: 'You', // Indicate that this message is from the sender
 			message: message,
-			timestamp: new Date(),
+			timestamp: new Date()
 		});
 
-		document.getElementById("dm-recipient").value = "";
-		document.getElementById("dm-message").value = "";
+		document.getElementById('dm-recipient').value = '';
+		document.getElementById('dm-message').value = '';
 	} else {
-		console.log("Socket is not open");
-		alert("Failed to send message");
+		console.log('Socket is not open');
+		alert('Failed to send message');
 	}
 }
 
@@ -150,7 +165,8 @@ function addMessageToUI(data) {
 }
 // Fetch and display posts
 function fetchAndDisplayPosts() {
-	axios.get('/posts')
+	axios
+		.get('/posts')
 		.then((response) => {
 			const postsContainer = document.querySelector('.posts');
 			if (!postsContainer) {
@@ -166,10 +182,18 @@ function fetchAndDisplayPosts() {
 				postElement.innerHTML = `
                     <h3><i class="fas fa-user-circle"></i> ${post.username}</h3>
                     <p>${post.message}</p>
-                    ${post.image ? `<div class="post-image"><img src="${post.image}" alt="Post image"></div>` : ''}
+                    ${
+											post.image
+												? `<div class="post-image"><img src="${post.image}" alt="Post image"></div>`
+												: ''
+										}
                     <div class="post-footer">
-                        <button class="like-button ${post.isLiked ? 'liked' : ''}" onclick="handleLikeButtonClick('${post.postID}')">
-                            <i class="far fa-heart"></i> Like (${post.likes || 0})
+                        <button class="like-button ${
+													post.isLiked ? 'liked' : ''
+												}" onclick="handleLikeButtonClick('${post.postID}')">
+                            <i class="far fa-heart"></i> Like (${
+															post.likes || 0
+														})
                         </button>
                         <button class="comment-button"><i class="far fa-comment"></i> Comment</button>
                         <button><i class="fas fa-share"></i> Share</button>
@@ -185,7 +209,8 @@ function fetchAndDisplayPosts() {
 let currentUsername = '';
 
 function updatePageForUser() {
-	axios.get('/auth/identity')
+	axios
+		.get('/auth/identity')
 		.then((response) => {
 			const user = response.data;
 			if (user && user.username) {
@@ -196,49 +221,44 @@ function updatePageForUser() {
 			}
 		})
 		.catch(console.error);
-
-
 }
-
 
 // Handle like button click
 function handleLikeButtonClick(postID) {
-	axios.post('/posts/like', { postID })
+	axios
+		.post('/posts/like', { postID })
 		.then(() => fetchAndDisplayPosts())
 		.catch((error) => console.error('Error liking post:', error));
 }
 
-
-
-
 async function fetchAndDisplayActiveUsers() {
 	try {
 		const response = await axios.get('/auth/active-users'); // Fetch active users from the server
-		const userList = document.getElementById('user-list-items'); 
-		userList.textContent = ''
+		const userList = document.getElementById('user-list-items');
+		userList.textContent = '';
 		response.data.forEach((user) => {
 			const listItem = document.createElement('li');
-			var time = user.timeActive
-			if(time < 60){
+			var time = user.timeActive;
+			if (time < 60) {
 				listItem.textContent = `${user.username}: Active for ${user.timeActive} seconds`;
 				userList.appendChild(listItem);
 			}
-			if(time > 60){
-				time = Math.floor(user.timeActive/60)
-				if (time == 1){
-					listItem.textContent = `${user.username}: Active for ${Math.floor(user.timeActive/60)} minute`;
+			if (time > 60) {
+				time = Math.floor(user.timeActive / 60);
+				if (time == 1) {
+					listItem.textContent = `${user.username}: Active for ${Math.floor(
+						user.timeActive / 60
+					)} minute`;
 					userList.appendChild(listItem);
-				}else{
-					listItem.textContent = `${user.username}: Active for ${Math.floor(user.timeActive/60)} minutes`;
+				} else {
+					listItem.textContent = `${user.username}: Active for ${Math.floor(
+						user.timeActive / 60
+					)} minutes`;
 					userList.appendChild(listItem);
 				}
-
 			}
-			
 		});
 	} catch (error) {
 		console.error('Error fetching active users:', error);
 	}
 }
-
-
