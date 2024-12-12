@@ -8,119 +8,117 @@ import { WebSocketServer, WebSocket } from 'ws'; // Import WebSocketServer and W
 const clients = new Map();
 
 async function initWS(server) {
-    const wss = new WebSocketServer({ server, path: '/websocket' });
+	const wss = new WebSocketServer({ server, path: '/websocket' });
 
-    wss.on('connection', async (ws, req) => {
-        console.log('New WebSocket connection established');
-        let username = 'guest';
-    
-        // Extract cookies from headers
-        const cookies = req.headers.cookie?.split(';').reduce((acc, cookie) => {
-            const [key, value] = cookie.trim().split('=');
-            acc[key] = value;
-            return acc;
-        }, {});
-    
-        const authToken = cookies?.auth;
-        if (authToken) {
-            try {
-                const db = await getDb('cse312');
-                const authCollection = db.collection('auth');
-                const authDocs = await authCollection.find({}).toArray();
-                const authDoc = authDocs.find((doc) =>
-                    bcrypt.compareSync(authToken, doc.authtoken)
-                );
-    
-                if (authDoc) {
-                    username = authDoc.user.toLowerCase();
-                }
-            } catch (error) {
-                console.error('Error authenticating user:', error);
-            }
-        }
-    
-        clients.set(ws, username);
-        console.log(`User ${username} connected`);
-    
-        ws.on('message', async (message) => {
-            try {
-                console.log(`Received message from ${username}: ${message}`);
-                const data = JSON.parse(message);
-    
-                if (data.type === 'direct_message') {
-                    await handleDM(ws, username, data);
-                } else {
-                    console.warn('Unhandled message type:', data.type);
-                }
-            } catch (error) {
-                console.error('Error processing WebSocket message:', error);
-            }
-        });
-    
-        ws.on('close', () => {
-            console.log(`User ${username} disconnected`);
-            clients.delete(ws);
-        });
-    });
+	wss.on('connection', async (ws, req) => {
+		console.log('New WebSocket connection established');
+		let username = 'guest';
 
-    console.log('WebSocket server initialized');
+		// Extract cookies from headers
+		const cookies = req.headers.cookie?.split(';').reduce((acc, cookie) => {
+			const [key, value] = cookie.trim().split('=');
+			acc[key] = value;
+			return acc;
+		}, {});
+
+		const authToken = cookies?.auth;
+		if (authToken) {
+			try {
+				const db = await getDb('cse312');
+				const authCollection = db.collection('auth');
+				const authDocs = await authCollection.find({}).toArray();
+				const authDoc = authDocs.find((doc) =>
+					bcrypt.compareSync(authToken, doc.authtoken)
+				);
+
+				if (authDoc) {
+					username = authDoc.user.toLowerCase();
+				}
+			} catch (error) {
+				console.error('Error authenticating user:', error);
+			}
+		}
+
+		clients.set(ws, username);
+		console.log(`User ${username} connected`);
+
+		ws.on('message', async (message) => {
+			try {
+				console.log(`Received message from ${username}: ${message}`);
+				const data = JSON.parse(message);
+
+				if (data.type === 'direct_message') {
+					await handleDM(ws, username, data);
+				} else {
+					console.warn('Unhandled message type:', data.type);
+				}
+			} catch (error) {
+				console.error('Error processing WebSocket message:', error);
+			}
+		});
+
+		ws.on('close', () => {
+			console.log(`User ${username} disconnected`);
+			clients.delete(ws);
+		});
+	});
+
+	console.log('WebSocket server initialized');
 }
 
 async function handleDM(ws, senderUsername, data) {
-    const { recipient, message } = data;
+	const { recipient, message } = data;
 
-    if (!recipient || !message) {
-        console.error('Recipient or message is missing');
-        return;
-    }
+	if (!recipient || !message) {
+		console.error('Recipient or message is missing');
+		return;
+	}
 
-    // Normalize usernames to lowercase
-    const normalizedRecipient = recipient.toLowerCase();
-    const normalizedSender = senderUsername.toLowerCase();
+	// Normalize usernames to lowercase
+	const normalizedRecipient = recipient.toLowerCase();
+	const normalizedSender = senderUsername.toLowerCase();
 
-    const payload = {
-        sender: normalizedSender,
-        recipient: normalizedRecipient,
-        message,
-        messageID: new ObjectId(),
-        timestamp: new Date(),
-    };
+	const payload = {
+		sender: normalizedSender,
+		recipient: normalizedRecipient,
+		message,
+		messageID: new ObjectId(),
+		timestamp: new Date()
+	};
 
-    try {
-        // Save message to the database
-        const db = await getDb('cse312');
-        const messagesCollection = db.collection('messages');
-        await messagesCollection.insertOne(payload);
+	try {
+		// Save message to the database
+		const db = await getDb('cse312');
+		const messagesCollection = db.collection('messages');
+		await messagesCollection.insertOne(payload);
 
-        // Send the message to both the recipient and the sender
-        for (const [client, username] of clients.entries()) {
-            const normalizedUsername = username.toLowerCase();
-            console.log(`Checking client with username: ${normalizedUsername}`); // Add this line
+		// Send the message to both the recipient and the sender
+		for (const [client, username] of clients.entries()) {
+			const normalizedUsername = username.toLowerCase();
+			console.log(`Checking client with username: ${normalizedUsername}`); // Add this line
 
-            if (
-                (normalizedUsername === normalizedRecipient ||
-                normalizedUsername === normalizedSender) &&
-                client.readyState === WebSocket.OPEN
-            ) {
-                console.log(`Sending message to ${username}`); // Add this line
-                client.send(
-                    JSON.stringify({
-                        type: 'direct_message',
-                        sender: senderUsername, // Use original case for display
-                        message,
-                        timestamp: payload.timestamp,
-                    })
-                );
-            }
-        }
-    } catch (error) {
-        console.error('Error handling direct message:', error);
-    }
+			if (
+				(normalizedUsername === normalizedRecipient ||
+					normalizedUsername === normalizedSender) &&
+				client.readyState === WebSocket.OPEN
+			) {
+				console.log(`Sending message to ${username}`); // Add this line
+				client.send(
+					JSON.stringify({
+						type: 'direct_message',
+						sender: senderUsername, // Use original case for display
+						message,
+						timestamp: payload.timestamp
+					})
+				);
+			}
+		}
+	} catch (error) {
+		console.error('Error handling direct message:', error);
+	}
 }
 
-
 export { initWS };
-
 // import { WebSocketServer } from 'ws';
 // import express from 'express';
 // import path from 'path';
@@ -192,10 +190,9 @@ export { initWS };
 
 //             //     }
 
-
 //             // }
 
-//             //clients[recipient].send(JSON.stringify(payload)); 
+//             //clients[recipient].send(JSON.stringify(payload));
 //         });
 
 //         ws.on('close', () => {
@@ -214,9 +211,6 @@ export { initWS };
 //         messageID: new ObjectId()
 //     }
 
-
-
-
 //     const db = await getDb('cse312');
 //     const messageCollection = db.collection('messages');
 //     await messageCollection.insertOne(payload);
@@ -233,7 +227,6 @@ export { initWS };
 // //     // Going to check the auth token to see if the user is valid | Most likely will be temporary
 // //     return;
 // // }
-
 
 // // Initialize WebSocket server
 // // initializeWebSocketServer(httpServer);
