@@ -1,4 +1,60 @@
+<!DOCTYPE html>
 <html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="styles.css">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+	<script src="index.js" defer></script>
+	<title>Lock In</title>
+</head>
+
+<body>
+	<div class="auth-box">
+		<div class="header">
+			<img id="logo" src="img/lockin_logo.png" alt="UB Logo" style="width: 100px; margin-bottom: 15px;">
+
+		</div>
+
+		<div class="auth-form register-form">
+			<h2>Register</h2>
+			<form action="/auth/register" method="post">
+				<input type="text" class="input-field" name="username" placeholder="Username" required>
+				<input type="password" class="input-field" name="password1" placeholder="Password" required>
+				<input type="password" class="input-field" name="password2" placeholder="Confirm Password" required>
+				<button type="submit">Register</button>
+			</form>
+		</div>
+
+		<div class="auth-form login-form">
+			<h2>Login</h2>
+			<form action="/auth/login" method="post">
+				<input type="text" class="input-field" name="username" placeholder="Username" required>
+				<input type="password" class="input-field" name="password" placeholder="Password" required>
+				<button type="submit">Login</button>
+			</form>
+		</div>
+
+
+
+	</div>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta
@@ -21,56 +77,31 @@
 		<title>CSE 312 Project</title>
 	</head>
 	<body>
-		<img id="logo" src="img/ub logo.png" alt="UB Logo"> <!-- Logo -->
-		<h1>CSE 312 Project</h1>
-		<div class = "username">
-			<!--<h4>Username:</h4>
-			<input id="username" value= "{{username}}" name="username" hidden> -->
-		</div>
-		<div class="auth-forms">
-			<div class="register-form">
-				<h2>Register</h2>
-				<form
-					action="/auth/register"
-					method="post"
-				>
-					<input
-						type="text"
-						name="username"
-						placeholder="Username"
-					/>
-					<input
-						type="password"
-						name="password1"
-						placeholder="Password"
-					/>
-					<input
-					type="password"
-					name="password2"
-					placeholder="Password"
-				/>
-					<button type="submit">Register</button>
-				</form>
-			</div>
-			<div class="login-form">
-				<h2>Login</h2>
-				<form
-					action="/auth/login"
-					method="post"
-				>
-					<input
-						type="text"
-						name="username"
-						placeholder="Username"
-					/>
-					<input
-						type="password"
-						name="password"
-						placeholder="Password"
-					/>
-					<button type="submit">Login</button>
-			
-			</div>
-		</div>
-	</body>
-</html>
+		<img id="logo" src="img/ub logo.png" alt="UB Logo"> < Logo 
+<h1>CSE 312 Project</h1>
+<div class="username">
+	<h4>Username:</h4>
+			<input id="username" value= "{{username}}" name="username" hidden> 
+</div>
+<div class="auth-forms">
+	<div class="register-form">
+		<h2>Register</h2>
+		<form action="/auth/register" method="post">
+			<input type="text" name="username" placeholder="Username" />
+			<input type="password" name="password1" placeholder="Password" />
+			<input type="password" name="password2" placeholder="Password" />
+			<button type="submit">Register</button>
+		</form>
+	</div>
+	<div class="login-form">
+		<h2>Login</h2>
+		<form action="/auth/login" method="post">
+			<input type="text" name="username" placeholder="Username" />
+			<input type="password" name="password" placeholder="Password" />
+			<button type="submit">Login</button>
+
+	</div>
+</div>
+</body>
+
+</html> -->
