@@ -89,6 +89,49 @@ function setupMessageForm() {
 	});
 }
 
+function showCommentForm(postID) {
+	const modal = document.createElement('div');
+	modal.className = 'modal';
+	modal.style.position = 'fixed';
+	modal.style.top = '50%';
+	modal.style.left = '50%';
+	modal.style.width = '50%';
+	modal.style.height = 'auto';
+	modal.style.zIndex = '9999';
+	modal.style.backgroundColor = '#E6ECF0';
+	modal.style.borderRadius = '10px';
+	modal.style.padding = '20px';
+	modal.style.transform = 'translate(-50%, -50%)';
+	modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" style="font-size: 24px; cursor: pointer;">&times;</span>
+            <div class="comment-input">
+                <form action="/posts/comment" method="post" class="comment-form">
+                    <input type="hidden" name="postID" value="${postID}">
+                    <label for="">Comment: <br></label>
+                    <textarea name="comment" id="comment" placeholder="Write a comment" rows="4"
+                        required></textarea><br>
+                    <button type="submit" id="submit-comment" class=""><i
+                            class="fas fa-paper-plane"></i>Reply</button>
+                </form>
+            </div>
+        </div>
+    `;
+	document.querySelector('.comment-modal').appendChild(modal);
+
+	modal.querySelector('.close').addEventListener('click', () => {
+		modal.remove();
+	});
+}
+
+document.querySelector('.posts').addEventListener('click', (event) => {
+	if (event.target.closest('.comment-button')) {
+		const postElement = event.target.closest('.post');
+		const postID = postElement.dataset.postId;
+		showCommentForm(postID);
+	}
+});
+
 function setupUserInfoPopup() {
 	const UserLink = document.getElementById("user-data"); // Get the messages link
 	const userPopup = document.getElementById("user-popup"); // Get the DM popup
@@ -149,37 +192,78 @@ function addMessageToUI(data) {
 	conversationsList.appendChild(listItem);
 }
 // Fetch and display posts
+// Fetch and display posts
 function fetchAndDisplayPosts() {
 	axios.get('/posts')
-		.then((response) => {
-			const postsContainer = document.querySelector('.posts');
-			if (!postsContainer) {
-				console.error('Posts container not found');
-				return;
-			}
-
-			postsContainer.innerHTML = '';
-			response.data.forEach((post) => {
-				const postElement = document.createElement('div');
-				postElement.classList.add('post');
-				postElement.dataset.postId = post.postID;
-				postElement.innerHTML = `
-                    <h3><i class="fas fa-user-circle"></i> ${post.username}</h3>
-                    <p>${post.message}</p>
-                    ${post.image ? `<div class="post-image"><img src="${post.image}" alt="Post image"></div>` : ''}
-                    <div class="post-footer">
-                        <button class="like-button ${post.isLiked ? 'liked' : ''}" onclick="handleLikeButtonClick('${post.postID}')">
-                            <i class="far fa-heart"></i> Like (${post.likes || 0})
-                        </button>
-                        <button class="comment-button"><i class="far fa-comment"></i> Comment</button>
-                        <button><i class="fas fa-share"></i> Share</button>
-                    </div>
-                `;
-				postsContainer.appendChild(postElement);
-			});
-		})
-		.catch((error) => console.error('Error fetching posts:', error));
-}
+	  .then((response) => {
+		const postsContainer = document.querySelector('.posts');
+		if (!postsContainer) {
+		  console.error('Posts container not found');
+		  return;
+		}
+  
+		response.data.forEach((post) => {
+		  let postElement = document.querySelector(`[data-post-id="${post.postID}"]`);
+		  
+		  if (!postElement) {
+			// Post element doesn't exist yet, create a new one
+			postElement = document.createElement('div');
+			postElement.classList.add('post');
+			postElement.dataset.postId = post.postID;
+			postsContainer.appendChild(postElement);
+		  }
+  
+		  // Update post content (only if new)
+		  postElement.innerHTML = `
+			<h3><i class="fas fa-user-circle"></i> ${post.username}</h3>
+			<p>${post.message}</p>
+			${post.image ? `<div class="post-image"><img src="${post.image}" alt="Post image"></div>` : ''}
+			<div class="post-footer">
+			  <button class="like-button ${post.isLiked ? 'liked' : ''}" onclick="handleLikeButtonClick('${post.postID}')">
+				<i class="far fa-heart"></i> Like (${post.likes || 0})
+			  </button>
+			  <button class="comment-button"><i class="far fa-comment"></i> Comment</button>
+			  <button><i class="fas fa-share"></i> Share</button>
+			</div>
+		  `;
+  
+		  // Fetch and display comments for this post
+		  fetchAndDisplayComments(post.postID, postElement);
+		});
+	  })
+	  .catch((error) => {
+		console.error('Error fetching posts:', error);
+	  });
+  }
+  
+  // Fetch and display comments for a specific post
+  function fetchAndDisplayComments(postID, postElement) {
+	axios.get('/posts/comments')
+	  .then((commentResponse) => {
+		const postComments = commentResponse.data.filter((comment) => comment.postID === postID);
+		const commentsContainer = postElement.querySelector('.comments-container') || document.createElement('div');
+		commentsContainer.classList.add('comments-container');
+  
+		postComments.forEach((comment) => {
+		  const commentElement = document.createElement('div');
+		  commentElement.classList.add('comment');
+		  commentElement.innerHTML = `
+			<h4><i class="fas fa-user-circle"></i> ${comment.username}</h4>
+			<p>${comment.message}</p>
+		  `;
+		  commentsContainer.appendChild(commentElement);
+		});
+  
+		// Only append if the container wasn't already added
+		if (!postElement.querySelector('.comments-container')) {
+		  postElement.appendChild(commentsContainer);
+		}
+	  })
+	  .catch((error) => {
+		console.error('Error fetching comments:', error);
+	  });
+  }
+  
 
 // Update user details on the page
 let currentUsername = '';
